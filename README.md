@@ -18,7 +18,15 @@
 
 `good first issue` labels lie more often than you'd think. On popular repositories, an issue labeled as beginner-friendly is usually already claimed, fixed in a different PR, or quietly resolved. You find it, get excited, read the code, and then discover a linked PR sitting there from six months ago. 
 
+<div align="center">
+  <img src="./assets/issue_stats_pie.png" alt="Reality of Good First Issues" width="600">
+</div>
+
 This AI Skill was built because this exact scenario happens far too often. It acts as an autonomous guide within your AI coding editor (Claude Code, Cursor, Cowork) to intelligently filter out "dead" issues, handle all the Git/GitHub CLI overhead, and optimize your PR for immediate acceptance by maintainers.
+
+<div align="center">
+  <img src="./assets/time_saved_bar.png" alt="Manual vs Automated Time Comparison" width="700">
+</div>
 
 ## Key Features
 
