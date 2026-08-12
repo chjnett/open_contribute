@@ -29,6 +29,20 @@ Each contains:
 
 This repo *is* an [Agent Skill](https://www.anthropic.com/news/skills) — each variant folder has a `SKILL.md` at its root with the required `name`/`description` frontmatter, plus a `references/` folder of load-on-demand detail. Agent Skills is an open standard read natively by Claude Code, Claude.ai, Cowork, and (via the same folder format) most other SKILL.md-aware coding agents.
 
+## Prerequisites
+
+This skill fully automates the GitHub workflow (forking, cloning, and PR creation) without requiring you to manually generate Personal Access Tokens (PAT). To enable this, you must have the **GitHub CLI (`gh`)** installed and authenticated.
+
+- **Mac:** `brew install gh`
+- **Windows:** `winget install --id GitHub.cli`
+- **Linux:** `sudo apt install gh`
+
+After installing, run the following command to authenticate and ensure you have permissions to push workflow files:
+```bash
+gh auth login --scopes workflow
+```
+Follow the prompts to authenticate via your web browser. (If you get SSH host key errors later, try running `gh config set git_protocol https`).
+
 ## Install
 
 ### Easiest — paste this prompt to your coding agent
@@ -78,6 +92,20 @@ Keep the repo public with `SKILL.md` at the root of each skill folder and a clea
 ## Status
 
 Built and refined in public while I use it for my own contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that's exactly the feedback that improves the checklist.
+
+## Troubleshooting
+
+If you encounter issues during the `gh` authentication or PR creation process:
+
+- **"refusing to allow an OAuth App to create or update workflow... without workflow scope"**
+  This happens when your `gh` token lacks permission to push to repositories containing GitHub Actions. Fix it by running:
+  `gh auth refresh --scopes workflow`
+- **"The value of the GITHUB_TOKEN environment variable is being used for authentication."**
+  If `gh` refuses to refresh because of an existing `GITHUB_TOKEN` environment variable, clear it first:
+  `unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows)
+- **"Host key verification failed" during cloning**
+  If your system is trying to use SSH and failing, tell `gh` to default to HTTPS:
+  `gh config set git_protocol https`
 
 ## License
 

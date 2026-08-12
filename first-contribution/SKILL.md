@@ -1,5 +1,6 @@
 ---
 name: first-contribution
+version: "1.2.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -17,20 +18,44 @@ Good-first-issue labels lie. Repos leave them on issues for months or years afte
 
 Don't skip straight to searching repos on a vague request like "help me find an open source project to contribute to." Get specific first — a recommendation built on guessed preferences wastes the later phases' precision.
 
-If the person hasn't already specified these in conversation, ask directly (use a structured multiple-choice tool like `ask_user_input_v0` if available — it's faster for the person than typing, and forces you to actually narrow down instead of asking one giant open-ended question):
+If the person hasn't already specified these in conversation, use a structured multiple-choice tool (`ask_user_input_v0`) to narrow down their preferences interactively. Cache answers to skip previously asked questions.
 
-1. **Domain/interest area** — what kind of project (e.g. web frameworks, CLI tools, ML/AI & RAG, infra/DevOps, games, mobile, data tools, "no preference"). This is the single highest-leverage question — people sustain contributions to things they'd use anyway.
-2. **Language/stack preference** — a specific language, or "no preference."
-3. **Experience level** — first-ever PR / done a few, want something a bit bigger / experienced, want a meaningful issue.
-4. **Already have a repo in mind?** — if yes, skip straight to Phase 2 with that repo as (at least) one candidate; don't re-ask questions 1-3 for that repo, though they still help if you're also suggesting alternatives.
+1️⃣ **관심 분야 선택** (Single select)
+   - Options from `references/domain-categories.md`.
 
-Keep it to 2-3 quick questions max, single-select where possible — this is a narrowing step, not an interview. If the person already answered some of this earlier in the conversation (e.g. they were just discussing a specific stack), don't re-ask; carry that forward and only ask what's still missing.
+2️⃣ **세부 영역 선택** (Single select, dynamic)
+   - Load the matching list from `references/subcategory-map.md`.
+
+3️⃣ **언어 / 스택 선택** (Single/Multi select)
+   - For each sub-category, present a curated list of common stacks.
+
+4️⃣ **경험 수준** (Single select)
+   - 첫 PR / 몇 개 PR 경험 / 숙련자
+
+5️⃣ **기여 유형** (Multi select)
+   - 문서/README 수정
+   - 타입 힌트 / 코드 정리
+   - 버그 수정
+   - 작은 기능 추가
 
 ## Phase 2 — Evaluate candidate repositories
 
 Use `bash_tool` with `curl` against the GitHub REST API (`api.github.com` is allowlisted) to pull real numbers instead of guessing. Also use `web_search` to find candidate repos in the relevant domain if the user hasn't named any.
 
 For each candidate repo, pull:
+```bash
+# Validate repository identifier (owner/repo)
+repo_regex='^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'
+if [[ ! "${owner}/${repo}" =~ $repo_regex ]]; then
+  echo "Invalid repository identifier: ${owner}/${repo}"
+  exit 1
+fi
+curl -s "https://api.github.com/repos/{owner}/{repo}"
+# -> stargazers_count, open_issues_count, pushed_at (recency), archived (must be false)
+
+curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+label:%22good+first+issue%22+state:open"
+# -> total_count of currently-open good-first-issues
+```
 
 ```bash
 curl -s "https://api.github.com/repos/{owner}/{repo}"
@@ -51,6 +76,10 @@ Score candidates against the criteria in `references/repo-evaluation-criteria.md
 | Last push | Days | Months+ |
 | Contributor base | Many outside orgs/individuals in recent PR authors | Nearly all commits from one company's employees |
 | Feature status | Actively adding features | README says "in maintenance mode" / "feature frozen" |
+
+**Before moving on to Phase 3, run the PR merge reality check** (`references/repo-evaluation-criteria.md` §3): the share of open PRs sitting 90+ days, and the external share of recently merged PRs. Everything in the table above measures whether a project is *active*; these two measure whether an outsider's PR actually lands, which is a different question — and it's the one that decides whether Phase 3 is worth doing at all. A repo can push daily and merge hundreds of PRs a quarter while merging nearly nothing from outside the core team.
+
+If both numbers land in the warning column, **show the user the actual figures and ask whether to continue with this repo or look at alternatives**. It's their call — don't auto-reject the repo, and don't proceed as if the numbers were fine. Skipping this check is how a repo passes Phase 2 on healthy-looking headline stats and only reveals itself after a full Phase 3 pass has already been spent on it.
 
 Present 3-6 candidates as a comparison (a table works well) and give a clear recommendation, not just a data dump — the person came here for a decision, not a spreadsheet.
 
@@ -88,14 +117,16 @@ See `references/message-templates.md` for the tone/structure guidelines behind e
 
 ## Phase 4 — Guided contribution workflow
 
-Once the user has picked an issue, walk them through it using their AI coding editor (Claude Code, Cursor, etc. — if they're doing this inside claude.ai chat rather than an editor, use `bash_tool` to actually clone and explore the repo yourself):
+Once the user has picked an issue, guide them through the GitHub CLI (`gh`) automated workflow. Using `gh` removes the need for manual Personal Access Tokens and cumbersome `git remote` setups.
 
-1. Clone the repo; read `CONTRIBUTING.md` and `README.md` first — every project has slightly different conventions (branch naming, commit message format, required tests, DCO/CLA sign-off).
-2. Locate the exact files relevant to the issue — don't try to explain the whole codebase, scope down to what's needed.
-3. Draft the fix, then **explain the diff back to the user line by line** rather than letting them submit something neither of you fully understands — reviewers can tell, and it erodes trust for future contributions too.
-4. Run the project's actual test suite locally (per CONTRIBUTING.md — pytest, jest, cargo test, etc. all differ) before suggesting a PR.
-5. Draft the PR title/description matching the *project's* existing PR style (look at 2-3 recently merged PRs for tone/format), and have the user do a final read-through before submitting — they're the author of record, not the AI.
-6. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.
+1. **Authentication Check:** Ask the user to run `gh auth status`. If not logged in or missing scopes, instruct them to run `gh auth login --scopes workflow` and follow the interactive prompts (use the web browser option for easiest setup). If they encounter SSH host key errors during cloning, tell them to run `gh config set git_protocol https`.
+2. **Automated Fork & Clone:** Instead of manual cloning, instruct the user to run `gh repo fork {owner}/{repo} --clone`. This single command creates the fork on their account, clones it locally, and sets up `origin` and `upstream` remotes perfectly.
+3. Locate the exact files relevant to the issue — don't try to explain the whole codebase, scope down to what's needed.
+4. Draft the fix, then **explain the diff back to the user line by line** rather than letting them submit something neither of you fully understands.
+5. Run the project's actual test suite locally (per `CONTRIBUTING.md` — pytest, jest, cargo test, etc.) before suggesting a PR.
+6. Commit the changes and push to the fork's branch.
+7. **Automated PR Creation:** Instruct the user to run `gh pr create --title "..." --body "..."` using the drafted title and description matching the project's style.
+8. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.
 
 ## A note on iterating this skill
 
