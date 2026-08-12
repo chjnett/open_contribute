@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🌟 First-Contribution AI Skill</h1>
+  <h1>First-Contribution AI Skill</h1>
   <p><strong>A fully automated Agent Skill that takes you from "I want to contribute" to a submitted Pull Request, instantly.</strong></p>
 
   <p>
@@ -14,23 +14,23 @@
 
 [한국어](./README.ko.md) | English
 
-## 📖 Overview
+## Overview
 
 `good first issue` labels lie more often than you'd think. On popular repositories, an issue labeled as beginner-friendly is usually already claimed, fixed in a different PR, or quietly resolved. You find it, get excited, read the code, and then discover a linked PR sitting there from six months ago. 
 
 This AI Skill was built because this exact scenario happens far too often. It acts as an autonomous guide within your AI coding editor (Claude Code, Cursor, Cowork) to intelligently filter out "dead" issues, handle all the Git/GitHub CLI overhead, and optimize your PR for immediate acceptance by maintainers.
 
-## ✨ Key Features
+## Key Features
 
-- **🎯 Domain-Specific Targeting:** Specialized flows for standard open-source contributions (`first-contribution`) and AI/RAG specific projects (`rag-contribution`).
-- **🛡️ Pre-PR Quality Control:** Enforces a rigid `pr-acceptance-checklist.md` to ensure your code has tests, proper formatting, and DCO sign-offs (`git commit -s`) *before* opening a PR.
-- **🤖 GitHub CLI Automation:** Zero manual tokens! Uses `gh` CLI to natively authenticate, fork, clone, and push without breaking a sweat.
-- **🔍 Smart Issue Triage:** Automatically filters out "good first issues" that have hidden assignees or linked PRs.
-- **💬 Outreach Drafter:** Automatically drafts professional "claim comments" and community channel (Discord/Slack) outreach messages.
+- **Domain-Specific Targeting:** Specialized flows for standard open-source contributions (`first-contribution`) and AI/RAG specific projects (`rag-contribution`).
+- **Pre-PR Quality Control:** Enforces a rigid `pr-acceptance-checklist.md` to ensure your code has tests, proper formatting, and DCO sign-offs (`git commit -s`) *before* opening a PR.
+- **GitHub CLI Automation:** Zero manual tokens! Uses `gh` CLI to natively authenticate, fork, clone, and push without breaking a sweat.
+- **Smart Issue Triage:** Automatically filters out "good first issues" that have hidden assignees or linked PRs.
+- **Outreach Drafter:** Automatically drafts professional "claim comments" and community channel (Discord/Slack) outreach messages.
 
 ---
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 This skill fully automates the GitHub workflow (forking, cloning, and PR creation) without requiring you to manually generate Personal Access Tokens (PAT). To enable this, you must have the **GitHub CLI (`gh`)** installed and authenticated.
 
@@ -48,7 +48,7 @@ gh auth login --scopes workflow
 
 ---
 
-## 🚀 Quick Start / Installation
+## Quick Start / Installation
 
 ### Easiest — Paste this prompt to your coding agent
 
@@ -70,7 +70,7 @@ Restart your agent to pick up the newly installed skill.
 
 ---
 
-## 💡 Usage
+## Usage
 
 Once installed, just describe what you want in plain language — the skill triggers on intent, no commands needed:
 
@@ -82,7 +82,7 @@ Once installed, just describe what you want in plain language — the skill trig
 
 ---
 
-## 🚑 Troubleshooting
+## Troubleshooting
 
 If you encounter issues during the `gh` authentication or PR creation process, refer to the following common solutions:
 
@@ -94,11 +94,11 @@ If you encounter issues during the `gh` authentication or PR creation process, r
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! 
 Built and refined in public while used for real-world contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that's exactly the feedback that improves the checklist.
 
-## 📝 License
+## License
 
 This project is licensed under the [MIT License](./LICENSE). Feel free to use it, fork it, and build on it.
