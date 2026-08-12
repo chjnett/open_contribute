@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-08-13
+
+### Added
+- **Defect-still-exists verification** (triage checklist, new Step 7). Every prior step
+  is a social signal — assignee, linked PRs, comments, age — and none of them prove the
+  bug is still present. A fix can arrive via an unrelated commit or a patch release while
+  the issue stays open. Run it last, on whatever survived Steps 2-6.
+
+  `argoproj/argo-cd#29051` is the cautionary case: 8 days old, unassigned, zero linked
+  PRs, labelled `severity:critical` and `priority:urgent` — it passed every social check
+  and had already been fixed, with `v3.3.14` shipped and correct.
+
+  The step also requires a real parser over `grep`/regex for structured artifacts: a
+  regex scan called that same manifest valid, while a YAML parser found the missing
+  volume immediately.
+
+- Note that the unlabelled recent-bug pool is much larger and less picked-over than the
+  labelled one — across six infra repos, 85% of labelled candidates already had a linked
+  PR.
+
 ## [1.3.0] - 2026-08-12
 
 Four fixes from a real run against `deepset-ai/haystack`, `run-llama/llama_index`,

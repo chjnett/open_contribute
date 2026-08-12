@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -81,6 +81,8 @@ Once a repo is chosen:
 2. For every candidate before recommending it, follow the full checklist in `references/issue-triage-checklist.md`. In short: read the **whole body** for an internal-only notice, check the **Development** section for linked PRs, check **Assignees**, and read the last 2-3 comments for signs it's already resolved or being worked on. Do this via `web_fetch` on the actual issue URL — don't infer staleness just from the `updated_at` timestamp; a recent update is often the sign it just got closed out, not that it's fresh (this bit the user before — an issue's most recent comment said "this looks resolved, closing candidate PR incoming").
 
    The body check is not optional. Some projects auto-append "this issue will be handled internally and isn't open for external contributions" to every non-curated issue, and it is invisible in search results — on `deepset-ai/haystack`, three issues passed every other check and all three carried that footer.
+
+   Then, on whatever survives, **verify the defect still exists in current code** (checklist Step 7). Every other check is a social signal and none of them prove the bug is still there — `argoproj/argo-cd#29051` was 8 days old, unassigned, zero linked PRs and labelled `severity:critical`, and had already been fixed by a release nobody closed the issue for. Read the file at the current default branch, and use a real parser rather than grep when the artifact is structured.
 
 3. Only recommend issues that pass every check. When nothing survives, **diagnose why before pivoting** — count the contribution label in both `state=open` and `state=all`:
    - **Rotten label** (many open, all old, nothing closing) plus a failing merge gate → say so plainly and recommend a different repo. Choosing more carefully inside a backlog that never merges is wasted effort.
