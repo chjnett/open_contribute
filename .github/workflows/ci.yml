@@ -25,14 +25,15 @@ jobs:
 
       - name: Validate SKILL.md frontmatter
         run: |
-          python scripts/validate_skill.py first-contribution/SKILL.md
-          python scripts/validate_skill.py rag-contribution/SKILL.md
+          for skill in */SKILL.md; do
+            python scripts/validate_skill.py "$skill"
+          done
 
-      - name: Package skill
+      - name: Package skills
         run: bash scripts/package_skill.sh
 
-      - name: Upload artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: first-contribution.skill
-          path: first-contribution.skill
+          name: skills
+          path: "*.skill"

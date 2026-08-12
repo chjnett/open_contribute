@@ -1,0 +1,11 @@
+# Build artifacts — .skill files are produced by scripts/package_skill.sh
+# and attached to releases, never committed.
+*.skill
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

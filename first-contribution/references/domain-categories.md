@@ -1,10 +1,13 @@
-# 프로젝트 도메인 카테고리
+# Project Domain Categories
 
-- 프론트엔드
-- 백엔드
-- 보안
+Use as the option list for Phase 1, question 1. Always offer "no preference" as an
+implicit extra — some people genuinely don't care and forcing a pick wastes a question.
+
+- Frontend
+- Backend
+- Security
 - AI / RAG
-- 데이터베이스
-- 모바일
-- 게임
-- 인프라 / DevOps
+- Databases
+- Mobile
+- Games
+- Infrastructure / DevOps
