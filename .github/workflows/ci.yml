@@ -24,7 +24,9 @@ jobs:
           pip install pyyaml
 
       - name: Validate SKILL.md frontmatter
-        run: python scripts/validate_skill.py open_contribute/first-contribution/SKILL.md
+        run: |
+          python scripts/validate_skill.py first-contribution/SKILL.md
+          python scripts/validate_skill.py rag-contribution/SKILL.md
 
       - name: Package skill
         run: bash scripts/package_skill.sh
