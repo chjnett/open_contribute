@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.7.0"
+  version: "1.7.1"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -140,7 +140,7 @@ Before running `gh pr create`, you **MUST** read and enforce `references/pr-acce
 
 ## Phase 5 — PR Submission and Iteration
 1. **Automated PR Creation:** Instruct the user to run `gh pr create --title "..." --body "..."` using the drafted title and description matching the project's style.
-2. **Check it reached the right people.** Read `.github/CODEOWNERS` for the team that owns the *feature*, not just the file path — coverage is often incomplete, and GitHub can only auto-request owners it can match. On `grafana/grafana#130614` the short URL feature belongs to `@grafana/sharing-squad` across four paths, but the changed utils file matched none of them, so it routed to unrelated frontend reviewers instead. When you find that gap, one comment naming the team and the reason is useful information for maintainers, not pressure.
+2. **Check it reached the right people — and expect the answer to be yes.** Read `.github/CODEOWNERS` for the owning team, but never conclude a routing gap from the reviewer list alone: many orgs replace a team request with individual members, which looks identical to mis-routing. Read the timeline's `review_requested` / `review_request_removed` events instead. On `grafana/grafana#130614` four individual reviewers and no team looked like the owning squad had been missed; the timeline showed `sharing-squad` was auto-requested from CODEOWNERS and then replaced by its own members. Only flag a gap when the file genuinely matches no rule, verified by reading the entries rather than a truncated search.
 3. **Tell the issue thread the PR is up.** Issue watchers don't automatically follow your fork's PR.
 4. **Then wait.** One to two weeks of silence on a large repo is normal, and external-PR CI held for maintainer approval is not evidence of neglect. If a nudge is needed, it gets **one** comment carrying new information ("rebased, CI green"), never a bare "any update?". `references/message-templates.md` §4-6 covers the wording and the anti-patterns that reliably lose you a review.
 5. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.

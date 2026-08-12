@@ -56,17 +56,25 @@ These aren't fill-in-the-blank templates — every message should be written spe
 
 Everything in this section is about **routing and clarity**, not pressure. A PR stalls far more often because nobody who owns that code knows it exists than because they saw it and declined.
 
-### Route by CODEOWNERS — by feature, not just by path
+### Check CODEOWNERS routing — and be very slow to claim it's broken
 
-Check `.github/CODEOWNERS` for the team that owns the *feature*, not only the exact file you touched. Path coverage is frequently incomplete, and GitHub can only auto-request owners it can match.
+Look up `.github/CODEOWNERS` for the team that owns the code you touched. Usually the answer is "it routed fine and there is nothing to do," and that is the outcome you should expect.
 
-Worked example — `grafana/grafana#130614` changed `public/app/core/utils/shortLinks.ts`. CODEOWNERS assigns the short URL feature to `@grafana/sharing-squad` across four paths (`/apps/shorturl/`, `/pkg/services/shorturls/`, the RTK client, the OpenAPI spec) — but that one utils file matches none of them, so the PR was auto-routed to four frontend reviewers instead, and the team that owns short URLs never heard about it.
+**Do not conclude there is a routing gap from the reviewer list alone.** Many orgs replace a team review request with individual members of that team, which looks identical to mis-routing if you only read `requested_reviewers`. Read the timeline instead:
 
-When you find this gap, say so plainly in a single comment:
+```bash
+gh api "repos/{owner}/{repo}/issues/{n}/timeline?per_page=100" \
+  --jq '.[]|select(.event=="review_requested" or .event=="review_request_removed")
+        | "\(.event): \(.requested_team.slug // .requested_reviewer.login)"'
+```
 
-> "CODEOWNERS routes the short URL paths to @{team}, but `{file}` isn't covered by a rule so this didn't reach them — flagging in case it belongs on their queue."
+Worked example — `grafana/grafana#130614` showed four individual frontend reviewers and no team, which looked like the owning squad had been missed. The timeline said otherwise: `sharing-squad` was auto-requested from CODEOWNERS, then removed and replaced by four of its members. Routing had worked correctly the whole time; there was nothing to flag, and a comment claiming a gap would have been simply wrong.
 
-That is useful information for the maintainers, not a demand. One mention, with the reason attached.
+Only when a file genuinely matches no rule — verified by reading the CODEOWNERS entries themselves, not a truncated search — is it worth one comment:
+
+> "CODEOWNERS routes the {feature} paths to @{team}, but `{file}` isn't covered by a rule so this didn't reach them — flagging in case it belongs on their queue."
+
+**A caution about how that mistake happened.** The first pass ran `grep shortLinks CODEOWNERS | head -5`, the matching line was the sixth, and the absence of output became "not covered." Never let an output limit decide a factual claim you are about to make in public — drop the `head`, or count the matches first.
 
 ### Tell the issue thread the PR is up
 

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-08-13
+
+### Fixed
+- **The CODEOWNERS worked example in 1.7.0 was factually wrong.** It claimed
+  `public/app/core/utils/shortLinks.ts` matched no CODEOWNERS rule and that
+  `grafana/grafana#130614` had therefore missed its owning team. The file *is* covered —
+  `/public/app/core/utils/shortLinks* @grafana/sharing-squad` — and the PR timeline shows
+  `sharing-squad` was auto-requested and then replaced by four of its own members.
+  Routing worked correctly throughout.
+
+  The section now teaches the opposite lesson: expect routing to be fine, and never infer
+  a gap from `requested_reviewers` alone, since replacing a team request with individual
+  members is indistinguishable from mis-routing unless you read the timeline's
+  `review_requested` / `review_request_removed` events.
+
+  The error came from `grep shortLinks CODEOWNERS | head -5` when the matching line was
+  the sixth — an output limit silently became a factual claim. That caution is now part of
+  the section, because the comment was one approval away from being posted to a public PR.
+
 ## [1.7.0] - 2026-08-13
 
 ### Added

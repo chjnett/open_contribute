@@ -56,17 +56,25 @@
 
 이 섹션은 전부 **라우팅과 명확성**에 관한 것이지 압박이 아닙니다. PR이 멈추는 건 그 코드를 소유한 사람이 보고 거절해서가 아니라, 그 사람이 PR의 존재를 모르기 때문인 경우가 훨씬 많습니다.
 
-### CODEOWNERS로 라우팅 — 경로가 아니라 기능 기준으로
+### CODEOWNERS 라우팅 확인 — 단, "깨졌다"는 판단은 아주 신중하게
 
-`.github/CODEOWNERS`에서 내가 건드린 정확한 파일만이 아니라 그 **기능**을 소유한 팀을 찾으세요. 경로 커버리지는 자주 불완전하고, GitHub는 매칭되는 소유자에게만 자동으로 리뷰를 요청합니다.
+`.github/CODEOWNERS`에서 내가 건드린 코드의 소유 팀을 확인하세요. 대개는 "정상 라우팅됐고 할 일 없음"이 답이고, 그게 기대해야 할 결과입니다.
 
-실제 사례 — `grafana/grafana#130614`은 `public/app/core/utils/shortLinks.ts`를 수정했습니다. CODEOWNERS는 short URL 기능을 네 경로에 걸쳐 `@grafana/sharing-squad`에 배정하고 있는데(`/apps/shorturl/`, `/pkg/services/shorturls/`, RTK 클라이언트, OpenAPI 스펙), 정작 저 utils 파일은 어느 규칙에도 매칭되지 않아 프론트엔드 리뷰어 4명에게 자동 배정됐고, short URL을 소유한 팀은 이 PR을 전혀 몰랐습니다.
+**리뷰어 목록만 보고 라우팅 공백이라고 단정하지 마세요.** 많은 조직이 팀 리뷰 요청을 그 팀 개인들로 치환하는데, `requested_reviewers`만 읽으면 잘못 라우팅된 것과 구분이 안 됩니다. 타임라인을 보세요:
 
-이런 공백을 발견하면 코멘트 **하나**로 담백하게 알리세요:
+```bash
+gh api "repos/{owner}/{repo}/issues/{n}/timeline?per_page=100" \
+  --jq '.[]|select(.event=="review_requested" or .event=="review_request_removed")
+        | "\(.event): \(.requested_team.slug // .requested_reviewer.login)"'
+```
 
-> "CODEOWNERS routes the short URL paths to @{팀}, but `{파일}` isn't covered by a rule so this didn't reach them — flagging in case it belongs on their queue."
+실제 사례 — `grafana/grafana#130614`은 프론트엔드 개인 4명만 보이고 팀이 없어서 소유 스쿼드가 누락된 것처럼 보였습니다. 타임라인은 달랐습니다: CODEOWNERS로 `sharing-squad`가 자동 요청됐다가 제거되고 그 팀 멤버 4명으로 치환된 것이었습니다. 라우팅은 처음부터 정상이었고, 알릴 공백도 없었으며, 공백이라고 주장하는 코멘트를 올렸다면 그냥 틀린 말이 됐을 겁니다.
 
-이건 요구가 아니라 메인테이너에게 유용한 정보입니다. 언급은 한 번, 이유를 붙여서.
+파일이 **정말로** 어느 규칙에도 매칭되지 않을 때만 — 잘린 검색 결과가 아니라 CODEOWNERS 항목을 직접 읽어서 확인한 뒤에 — 코멘트 하나가 의미 있습니다:
+
+> "CODEOWNERS routes the {기능} paths to @{팀}, but `{파일}` isn't covered by a rule so this didn't reach them — flagging in case it belongs on their queue."
+
+**이 실수가 어떻게 났는지도 남깁니다.** 첫 시도에서 `grep shortLinks CODEOWNERS | head -5`를 돌렸는데 매칭된 줄이 여섯 번째였고, 출력이 없다는 게 "미커버"가 돼버렸습니다. 공개적으로 할 사실 주장을 출력 제한이 대신 결정하게 두지 마세요 — `head`를 빼거나 매칭 수를 먼저 세세요.
 
 ### 이슈 스레드에 PR이 올라갔다고 알리기
 
