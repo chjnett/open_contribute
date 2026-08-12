@@ -26,21 +26,31 @@ curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+stat
 curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+state:open+created:<YYYY-MM-DD"  # 90 days ago
 ```
 
-**External merged share** — of the PRs merged in the last 90 days, how many came from outside the core team:
+**Outsider merge share** — of the PRs merged recently, how many came from someone other than the handful of people who merge constantly:
 
 ```bash
-curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+is:merged+merged:>YYYY-MM-DD&per_page=100" \
-  | jq -r '.items[].user.login' | sort | uniq -c | sort -rn
+curl -s "https://api.github.com/repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100" \
+  | jq -r '[.[] | select(.merged_at != null) | .user.login
+            | select(test("\\[bot\\]|(?i)bot$") | not)]
+           | group_by(.) | map({u: .[0], n: length}) | sort_by(-.n)
+           | {merged: (map(.n)|add), top5: (.[0:5]|map(.n)|add), oneoff: (map(select(.n==1))|length)}'
 ```
 
-The core team is usually obvious from that histogram — the same handful of logins dominating it, plus bots. Everyone else is external.
+Report two numbers from this: the share of merged PRs **not** from the top-5 authors, and the count of authors with exactly one merged PR in the window. Both are assumption-free — you never have to decide who is an employee.
+
+Do **not** try to classify core vs. external by name, and do not trust the `author_association` field. Both fail in opposite directions. On `deepset-ai/haystack`, `author_association` reported only 11 core authors because deepset staff keep org membership private — `sjrl`, `davidsbatista`, and `bogdankostic` all came back as `CONTRIBUTOR` despite obviously being maintainers. Guessing from names fails the other way as soon as a repo has regular outside contributors you don't recognize.
+
+Use the `/pulls` REST endpoint rather than the search API for this. Search is where the strict secondary rate limit lives (see below), and `/pulls` gives you the same authorship data.
 
 | | Healthy | Warning |
 |---|---|---|
 | Open PRs 90+ days old | under ~30% | over ~50% |
-| Merged PRs from external authors | 25%+ | under ~10% |
+| Merged PRs outside the top-5 authors | 25%+ | under ~10% |
+| One-off authors in the window | several | ~none |
 
 Both columns landing in "warning" means a first contribution here is unlikely to merge regardless of which issue gets picked. **Show the user the actual numbers and let them decide whether to continue** — some people have a good reason to contribute to a specific project anyway (they use it at work, they want to learn that codebase, visibility). Don't silently drop the repo, and don't quietly proceed as though the numbers were fine.
+
+**Rate limits.** The GitHub search API enforces a *secondary* rate limit that trips even when authenticated, after only a handful of rapid queries — it is separate from the 60/hour unauthenticated primary limit and from the 5000/hour authenticated one. Space search calls at least 5-8 seconds apart, and prefer plain REST endpoints (`/pulls`, `/issues`, `/issues/{n}/timeline`) wherever they can answer the same question, since they are far more forgiving. A 403 mentioning "secondary rate limit" needs a minute or two of backoff, not a retry.
 
 Worked example — `chroma-core/chroma`, checked 2026-08. Every headline signal was good: 29k stars, pushed the previous day, 238 PRs merged in 90 days, 11 open `good first issue`s. The gate numbers were not: 275 of 452 open PRs (61%) were 90+ days old, external authors accounted for roughly 9% of merged PRs, and all 17 PRs opened against its good-first-issues had failed to merge — 11 still open after up to 8 months, 6 closed unmerged. One contributor's parting comment on issue #2054: "It is taking too long to get a PR merged so I am removing myself from the issue." The activity was real; it just wasn't reaching outsiders.
 

@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.2.1"
+  version: "1.3.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -29,6 +29,8 @@ If the person hasn't already specified these in conversation, use a structured m
 
 Don't run all five as a rigid interview. Skip any the person has already answered, and if they arrive with a repo already in mind, go straight to Phase 2 with that repo as a candidate.
 
+**Most structured-question tools cap out at four options per question**, and `domain-categories.md` lists eight. Don't silently drop four domains to fit — group them into four coherent buckets for question 1 (e.g. "AI / RAG · vector DBs", "Backend · databases", "Infra / DevOps · security", "Frontend · mobile · games"), then let question 2 do the narrowing inside the bucket. Say that you're grouping, so the person knows the missing options weren't a judgment about them.
+
 ## Phase 2 — Evaluate candidate repositories
 
 Use `bash_tool` with `curl` against the GitHub REST API (`api.github.com` is allowlisted) to pull real numbers instead of guessing. Also use `web_search` to find candidate repos in the relevant domain if the user hasn't named any.
@@ -48,7 +50,7 @@ curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+label:%22goo
 # -> total_count of currently-open good-first-issues
 ```
 
-Note: unauthenticated GitHub API calls are rate-limited to 60/hour. Space out calls (`sleep 3-5` between requests) and batch repos rather than hammering the API. If you hit a rate limit, fall back to `web_search` / `web_fetch` for that repo and tell the user briefly why the numbers might be less precise.
+Note on rate limits: unauthenticated GitHub API calls are capped at 60/hour. Authenticating (via `gh`, which Prerequisites already requires) raises that to 5000/hour — but the **search API** additionally enforces a *secondary* limit that trips after only a handful of rapid queries no matter how you authenticate. Space search calls 5-8 seconds apart, and prefer plain REST endpoints (`/pulls`, `/issues`, `/issues/{n}/timeline`) whenever they answer the same question. A 403 mentioning "secondary rate limit" needs a minute or two of backoff, not an immediate retry. If you're still stuck, fall back to `web_search` / `web_fetch` and tell the user briefly why the numbers might be less precise.
 
 Score candidates against the criteria in `references/repo-evaluation-criteria.md` (read it before scoring — don't wing this from memory). At a glance, the key signals are:
 
@@ -76,11 +78,14 @@ Once a repo is chosen:
    ```
    (fetch this with `web_fetch`, or hit the search API with `+no:assignee` appended to the query)
 
-2. For every candidate before recommending it, follow the full checklist in `references/issue-triage-checklist.md`. In short: check the **Development** section for linked PRs, check **Assignees**, and read the last 2-3 comments for signs it's already resolved or being worked on. Do this via `web_fetch` on the actual issue URL — don't infer staleness just from the `updated_at` timestamp; a recent update is often the sign it just got closed out, not that it's fresh (this bit the user before — an issue's most recent comment said "this looks resolved, closing candidate PR incoming").
+2. For every candidate before recommending it, follow the full checklist in `references/issue-triage-checklist.md`. In short: read the **whole body** for an internal-only notice, check the **Development** section for linked PRs, check **Assignees**, and read the last 2-3 comments for signs it's already resolved or being worked on. Do this via `web_fetch` on the actual issue URL — don't infer staleness just from the `updated_at` timestamp; a recent update is often the sign it just got closed out, not that it's fresh (this bit the user before — an issue's most recent comment said "this looks resolved, closing candidate PR incoming").
 
-3. Only recommend issues that pass all three checks. If most of the label's contents turn out to be stale (this happens more often than not on popular repos), say so plainly and pivot to:
-   - The repo's Discord/Slack `#contributing` channel if one is linked in the README — ask a maintainer directly for a currently-open recommendation
-   - Recently-*opened* bug reports that look self-contained, even without the label
+   The body check is not optional. Some projects auto-append "this issue will be handled internally and isn't open for external contributions" to every non-curated issue, and it is invisible in search results — on `deepset-ai/haystack`, three issues passed every other check and all three carried that footer.
+
+3. Only recommend issues that pass every check. When nothing survives, **diagnose why before pivoting** — count the contribution label in both `state=open` and `state=all`:
+   - **Rotten label** (many open, all old, nothing closing) plus a failing merge gate → say so plainly and recommend a different repo. Choosing more carefully inside a backlog that never merges is wasted effort.
+   - **Empty label** (few or zero open, many closed) → the repo is healthy and issues get finished fast; nothing is free *right now*. Say the wait is worth it and offer to watch the label.
+   - Either way, the README's Discord/Slack `#contributing` channel is worth asking in, and recently-opened self-contained bug reports are worth checking — but re-run the internal-only check on those, since unlabeled issues are exactly where those notices live.
 
 4. Rank the surviving candidates by scope (smallest/clearest first) and explain *why* each one is a reasonable starting point, not just what it is.
 
@@ -92,7 +97,7 @@ Don't stop at just naming an issue — draft the actual outreach the user needs 
 
 **Draft a claim comment for the chosen issue.** Once an issue has passed the Phase 3 triage, write 1-2 short comment variants the user can post directly on the issue to signal intent before starting work (e.g. "casual" vs. "a bit more detail on planned approach"). Keep these genuinely short — a paragraph max. A comment that's too long or oversells intent reads as inexperienced; maintainers just want to know the issue is claimed and roughly how.
 
-**Draft a maintainer/Discord outreach message when needed.** This applies in two cases: (a) the good-first-issue label turned out to be entirely stale (Phase 3, step 6), or (b) the user wants a bigger/more specific issue than what's labeled. Draft a short, specific message for the `#contributing` channel or as an issue comment — specific enough to get a useful reply (mention relevant experience/stack, ask for a currently-open recommendation) but not a wall of text. Avoid generic "hi I want to contribute, what should I do?" phrasing — maintainers see a lot of that and it doesn't stand out or get prioritized.
+**Draft a maintainer/Discord outreach message when needed.** This applies in two cases: (a) nothing survived triage (Phase 3, step 3) — whether the label was rotten or simply empty, or (b) the user wants a bigger/more specific issue than what's labeled. Draft a short, specific message for the `#contributing` channel or as an issue comment — specific enough to get a useful reply (mention relevant experience/stack, ask for a currently-open recommendation) but not a wall of text. Avoid generic "hi I want to contribute, what should I do?" phrasing — maintainers see a lot of that and it doesn't stand out or get prioritized.
 
 **Draft the PR description** at submission time too (already covered in Phase 4, step 5) — same principle: match the project's tone, keep it scoped to what actually changed.
 

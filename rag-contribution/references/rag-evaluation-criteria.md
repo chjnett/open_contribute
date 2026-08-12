@@ -18,23 +18,46 @@ curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+stat
 curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+state:open+created:<YYYY-MM-DD"  # 90 days ago
 ```
 
-**External merged share** — of PRs merged in the last 90 days, how many came from
-outside the core team:
+**Outsider merge share** — of PRs merged recently, how many came from someone other
+than the handful of people who merge constantly:
 
 ```bash
-curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+is:merged+merged:>YYYY-MM-DD&per_page=100" \
-  | jq -r '.items[].user.login' | sort | uniq -c | sort -rn
+curl -s "https://api.github.com/repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100" \
+  | jq -r '[.[] | select(.merged_at != null) | .user.login
+            | select(test("\\[bot\\]|(?i)bot$") | not)]
+           | group_by(.) | map({u: .[0], n: length}) | sort_by(-.n)
+           | {merged: (map(.n)|add), top5: (.[0:5]|map(.n)|add), oneoff: (map(select(.n==1))|length)}'
 ```
+
+Report the share of merged PRs **not** from the top-5 authors, plus the count of authors
+with exactly one merged PR. Both are assumption-free — you never have to decide who is
+an employee.
+
+Do **not** classify core vs. external by name, and do not trust `author_association`.
+Both fail, in opposite directions. On `deepset-ai/haystack`, `author_association`
+reported only 11 core authors because staff keep org membership private — `sjrl`,
+`davidsbatista`, and `bogdankostic` all came back as `CONTRIBUTOR` despite obviously
+being maintainers.
+
+Use `/pulls` rather than the search API here. The search API enforces a *secondary* rate
+limit that trips even when authenticated, after only a handful of rapid queries — space
+search calls 5-8 seconds apart, prefer plain REST endpoints, and back off a minute or two
+on a 403 mentioning "secondary rate limit" rather than retrying.
 
 | | Healthy | Warning |
 |---|---|---|
 | Open PRs 90+ days old | under ~30% | over ~50% |
-| Merged PRs from external authors | 25%+ | under ~10% |
+| Merged PRs outside the top-5 authors | 25%+ | under ~10% |
+| One-off authors in the window | several | ~none |
 
 Both in the warning column means a first contribution here is unlikely to merge no
 matter which issue gets picked. Show the user the actual numbers and let them decide
 whether to continue — don't silently drop the repo, and don't proceed as though the
 numbers were fine.
+
+Measured 2026-08 for reference: `run-llama/llama_index` 8% stale / 50% outside top-5,
+`langchain-ai/langchain` 44% stale / 23% outside top-5, `qdrant/qdrant` 41% stale / 29%
+outside top-5.
 
 ## 2. Retrieval test coverage
 

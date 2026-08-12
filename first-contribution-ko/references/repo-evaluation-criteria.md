@@ -26,21 +26,31 @@ curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+stat
 curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+state:open+created:<YYYY-MM-DD"  # 90일 전 날짜
 ```
 
-**외부인 머지 비율** — 최근 90일간 머지된 PR 중 핵심 팀 바깥에서 온 비율:
+**외부인 머지 비율** — 최근 머지된 PR 중, 상시로 머지하는 소수 몇 명이 아닌 사람에게서 나온 비율:
 
 ```bash
-curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+type:pr+is:merged+merged:>YYYY-MM-DD&per_page=100" \
-  | jq -r '.items[].user.login' | sort | uniq -c | sort -rn
+curl -s "https://api.github.com/repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100" \
+  | jq -r '[.[] | select(.merged_at != null) | .user.login
+            | select(test("\\[bot\\]|(?i)bot$") | not)]
+           | group_by(.) | map({u: .[0], n: length}) | sort_by(-.n)
+           | {merged: (map(.n)|add), top5: (.[0:5]|map(.n)|add), oneoff: (map(select(.n==1))|length)}'
 ```
 
-핵심 팀은 대개 이 목록에서 바로 드러납니다 — 상위를 차지하는 몇 개의 계정과 봇이 그들이고, 나머지가 외부인입니다.
+여기서 두 가지를 보고하세요: 머지 PR 중 **상위 5명이 아닌** 사람의 비율, 그리고 해당 기간에 머지 PR이 정확히 1건인 저자 수. 둘 다 가정이 필요 없습니다 — 누가 직원인지 판단할 필요가 아예 없어요.
+
+이름으로 코어/외부를 분류하려 하지 말고, `author_association` 필드도 믿지 마세요. 둘 다 반대 방향으로 틀립니다. `deepset-ai/haystack`에서 `author_association`은 코어를 11명으로만 집계했는데, deepset 직원들이 조직 멤버십을 비공개로 두고 있어 `sjrl`, `davidsbatista`, `bogdankostic`이 명백한 메인테이너인데도 전부 `CONTRIBUTOR`로 나왔기 때문입니다. 이름 추측은 반대로, 내가 모르는 상시 외부 기여자가 있는 레포에서 바로 무너집니다.
+
+이 측정엔 검색 API 대신 `/pulls` REST 엔드포인트를 쓰세요. 아래에서 설명할 secondary rate limit이 걸리는 곳이 검색 API고, `/pulls`로도 같은 작성자 데이터를 얻을 수 있습니다.
 
 | | 건강 | 경고 |
 |---|---|---|
 | 90일 이상 방치된 열린 PR | 약 30% 미만 | 약 50% 초과 |
-| 외부인이 작성한 머지 PR | 25% 이상 | 약 10% 미만 |
+| 상위 5명 밖에서 나온 머지 PR | 25% 이상 | 약 10% 미만 |
+| 해당 기간 1건짜리 저자 수 | 여러 명 | 거의 없음 |
 
 둘 다 경고 구간이면 어떤 이슈를 고르든 첫 기여가 머지될 가능성이 낮습니다. **실제 수치를 사용자에게 보여주고 계속할지 직접 결정하게 하세요** — 그래도 그 프로젝트에 기여할 이유가 있는 사람도 있습니다(회사에서 쓰고 있거나, 그 코드베이스를 익히고 싶거나, 노출 목적이거나). 조용히 레포를 탈락시키지도 말고, 수치가 괜찮았던 것처럼 그냥 넘어가지도 마세요.
+
+**Rate limit 주의.** GitHub 검색 API에는 *secondary* rate limit이 따로 있어서, 인증을 했더라도 빠른 쿼리 몇 번이면 걸립니다 — 비인증 60회/시간 제한과도, 인증 5000회/시간 제한과도 별개입니다. 검색 호출은 최소 5~8초 간격을 두고, 같은 질문에 답할 수 있는 일반 REST 엔드포인트(`/pulls`, `/issues`, `/issues/{n}/timeline`)를 우선 쓰세요 — 훨씬 관대합니다. "secondary rate limit"이 적힌 403이 뜨면 재시도가 아니라 1~2분 백오프가 필요합니다.
 
 실제 사례 — `chroma-core/chroma`, 2026-08 확인. 표면 지표는 전부 좋았습니다: 스타 29k, 전날 푸시, 90일간 PR 238건 머지, 열린 `good first issue` 11건. 게이트 수치는 아니었습니다: 열린 PR 452건 중 275건(61%)이 90일 이상 방치, 머지 PR 중 외부인 작성은 약 9%, 그리고 good-first-issue에 올라온 PR 17건이 **전부 머지 실패** — 11건은 최장 8개월째 열린 채, 6건은 머지 없이 종료. 이슈 #2054에 남은 한 기여자의 마지막 말: "PR 머지가 너무 오래 걸려서 이 이슈에서 빠지겠다." 활동은 진짜였지만, 그 활동이 외부인에게까지 닿지 않았던 겁니다.
 
