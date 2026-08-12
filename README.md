@@ -1,35 +1,36 @@
+<div align="center">
+  <h1>🌟 First-Contribution AI Skill</h1>
+  <p><strong>A fully automated Agent Skill that takes you from "I want to contribute" to a submitted Pull Request, instantly.</strong></p>
+
+  <p>
+    <a href="https://github.com/chjnett/open_contribute/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status"></a>
+    <a href="https://github.com/chjnett/open_contribute/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
+    <img src="https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square" alt="Platform">
+  </p>
+</div>
+
+---
+
 [한국어](./README.ko.md) | English
 
-# first-contribution
+## 📖 Overview
 
-A [Claude Skill](https://www.anthropic.com/news/skills) that gets you from "I want to contribute to open source" to an actual submitted pull request — without wasting an afternoon on a `good first issue` that turned out to be dead three months ago.
+`good first issue` labels lie more often than you'd think. On popular repositories, an issue labeled as beginner-friendly is usually already claimed, fixed in a different PR, or quietly resolved. You find it, get excited, read the code, and then discover a linked PR sitting there from six months ago. 
 
-`good first issue` labels lie more often than you'd think. On popular repos, a label opened in 2023 is usually already claimed, fixed in a different PR, or quietly resolved — the issue just never got closed. You find it, get excited, start reading the code, then discover a linked PR sitting there from six months ago. This skill exists because that happened, twice in a row, on the same repo, in one afternoon.
+This AI Skill was built because this exact scenario happens far too often. It acts as an autonomous guide within your AI coding editor (Claude Code, Cursor, Cowork) to intelligently filter out "dead" issues, handle all the Git/GitHub CLI overhead, and optimize your PR for immediate acceptance by maintainers.
 
-## What's inside
+## ✨ Key Features
 
-- **`first-contribution/`** — the skill, responds in English
-- **`first-contribution-ko/`** — the same skill, responds in Korean ([한국어 안내](./README.ko.md))
+- **🎯 Domain-Specific Targeting:** Specialized flows for standard open-source contributions (`first-contribution`) and AI/RAG specific projects (`rag-contribution`).
+- **🛡️ Pre-PR Quality Control:** Enforces a rigid `pr-acceptance-checklist.md` to ensure your code has tests, proper formatting, and DCO sign-offs (`git commit -s`) *before* opening a PR.
+- **🤖 GitHub CLI Automation:** Zero manual tokens! Uses `gh` CLI to natively authenticate, fork, clone, and push without breaking a sweat.
+- **🔍 Smart Issue Triage:** Automatically filters out "good first issues" that have hidden assignees or linked PRs.
+- **💬 Outreach Drafter:** Automatically drafts professional "claim comments" and community channel (Discord/Slack) outreach messages.
 
-Each contains:
-- **`SKILL.md`** — the workflow: repo evaluation, issue triage, outreach drafting, guided contribution
-- **`references/repo-evaluation-criteria.md`** — scoring criteria for "is this repo actually beginner-friendly"
-- **`references/issue-triage-checklist.md`** — the 6-step check that filters out stale/claimed issues before they're ever recommended
-- **`references/message-templates.md`** — tone/structure guides for issue-claim comments, `#contributing` channel outreach, and PR descriptions
+---
 
-## How it works
-
-1. **Narrows down what you're looking for** — domain, stack, experience level — before searching, so the recommendation is built on your actual preferences instead of guesses.
-2. **Evaluates candidate repos with real data** — pulls live numbers from the GitHub API (open issue count, `good first issue` count, last-push recency, external-contributor ratio) instead of vibes.
-3. **Filters out dead issues before recommending them** — checks linked PRs, assignees, and actually reads the last few comments for "this looks resolved."
-4. **Finds community channels and drafts outreach** — pulls the Discord/Slack link from the README, drafts a claim comment for the issue, and — if the labeled issues are all dead — drafts a specific ask for the `#contributing` channel instead of a generic "how do I contribute?"
-5. **Walks you through the actual fix** — clones the repo, reads `CONTRIBUTING.md`, scopes to the relevant files, drafts the change, explains the diff, runs the real test suite, and drafts a PR description matching the project's existing style.
-
-## How it's packaged
-
-This repo *is* an [Agent Skill](https://www.anthropic.com/news/skills) — each variant folder has a `SKILL.md` at its root with the required `name`/`description` frontmatter, plus a `references/` folder of load-on-demand detail. Agent Skills is an open standard read natively by Claude Code, Claude.ai, Cowork, and (via the same folder format) most other SKILL.md-aware coding agents.
-
-## Prerequisites
+## 🛠️ Prerequisites
 
 This skill fully automates the GitHub workflow (forking, cloning, and PR creation) without requiring you to manually generate Personal Access Tokens (PAT). To enable this, you must have the **GitHub CLI (`gh`)** installed and authenticated.
 
@@ -38,75 +39,66 @@ This skill fully automates the GitHub workflow (forking, cloning, and PR creatio
 - **Linux:** `sudo apt install gh`
 
 After installing, run the following command to authenticate and ensure you have permissions to push workflow files:
+
 ```bash
 gh auth login --scopes workflow
 ```
-Follow the prompts to authenticate via your web browser. (If you get SSH host key errors later, try running `gh config set git_protocol https`).
 
-## Install
+> **Note:** Follow the prompts to authenticate via your web browser. (If you get SSH host key errors later, try running `gh config set git_protocol https`).
 
-### Easiest — paste this prompt to your coding agent
+---
 
-Copy the block below into Claude Code or any SKILL.md-aware agent. Swap the folder name for `first-contribution-ko` if you want the Korean-responding version instead.
+## 🚀 Quick Start / Installation
 
-```
+### Easiest — Paste this prompt to your coding agent
+
+Copy the block below into Claude Code or any SKILL.md-aware agent. (Swap the folder name for `first-contribution-ko` if you want the Korean-responding version).
+
+```text
 Install the first-contribution agent skill for me, and nothing else.
 
 1. Figure out my skills directory (Claude Code → ~/.claude/skills/,
    otherwise my tool's documented skills directory).
 2. Clone https://github.com/chjnett/open_contribute into a temp folder.
-3. Copy the first-contribution/ subfolder (or first-contribution-ko/ for
-   the Korean-responding version) into <skills directory>/first-contribution/.
+3. Copy the first-contribution/ subfolder into <skills directory>/first-contribution/.
 4. Confirm SKILL.md exists at the root of the copied folder.
 5. Do not modify any other files, settings, or skills. Report the final
    install path and stop.
 ```
 
-Restart the agent (or start a new session) so it picks up the skill.
+Restart your agent to pick up the newly installed skill.
 
-### Or install it yourself
+---
 
-**Claude Code** — `~/.claude/skills/` (global) or `.claude/skills/` (per-project)
+## 💡 Usage
 
-```bash
-git clone https://github.com/chjnett/open_contribute /tmp/open_contribute
-cp -r /tmp/open_contribute/first-contribution ~/.claude/skills/first-contribution
-# or, for the Korean version:
-cp -r /tmp/open_contribute/first-contribution-ko ~/.claude/skills/first-contribution-ko
-```
+Once installed, just describe what you want in plain language — the skill triggers on intent, no commands needed:
 
-**Claude.ai / Cowork** — upload the packaged `.skill` file (`first-contribution.skill` or `first-contribution-ko.skill`) from a release, or upload the `SKILL.md` + `references/` folder directly in Settings → Skills.
+> *"I want to start contributing to open source, help me find a good repo and issue"*
 
-## Use it
+> *"Is this repo beginner-friendly? https://github.com/langchain-ai/langchain"*
 
-Once installed, just describe what you want in plain language — the skill triggers on intent, no command needed:
+> *"Find me a good-first-issue in a RAG/Python project."*
 
-> "I want to start contributing to open source, help me find a good repo and issue"
-> "is this repo beginner-friendly? [github link]"
-> "find me a good-first-issue in a Rust project"
+---
 
-## Publishing your own copy
+## 🚑 Troubleshooting
 
-Keep the repo public with `SKILL.md` at the root of each skill folder and a clear `description` — that's the line every agent reads to decide when to fire the skill. To go further: open a PR to [anthropics/skills](https://github.com/anthropics/skills), list it on a skills directory, or bundle it into a Claude Code plugin marketplace.
+If you encounter issues during the `gh` authentication or PR creation process, refer to the following common solutions:
 
-## Status
+| Error Message / Issue | Solution |
+| :--- | :--- |
+| **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | Your `gh` token lacks permission to push to repositories containing GitHub Actions. Fix it by running:<br>`gh auth refresh --scopes workflow` |
+| **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | `gh` is refusing to refresh because an old manual token is stuck in your environment. Clear it first:<br>`unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
+| **"Host key verification failed" (during clone)** | Your system is trying to use SSH and failing because keys aren't set up. Tell `gh` to default to HTTPS instead:<br>`gh config set git_protocol https` |
 
-Built and refined in public while I use it for my own contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that's exactly the feedback that improves the checklist.
+---
 
-## Troubleshooting
+## 🤝 Contributing
 
-If you encounter issues during the `gh` authentication or PR creation process:
+We welcome contributions! 
+Built and refined in public while used for real-world contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that's exactly the feedback that improves the checklist.
 
-- **"refusing to allow an OAuth App to create or update workflow... without workflow scope"**
-  This happens when your `gh` token lacks permission to push to repositories containing GitHub Actions. Fix it by running:
-  `gh auth refresh --scopes workflow`
-- **"The value of the GITHUB_TOKEN environment variable is being used for authentication."**
-  If `gh` refuses to refresh because of an existing `GITHUB_TOKEN` environment variable, clear it first:
-  `unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows)
-- **"Host key verification failed" during cloning**
-  If your system is trying to use SSH and failing, tell `gh` to default to HTTPS:
-  `gh config set git_protocol https`
+## 📝 License
 
-## License
-
-[MIT](./LICENSE). Use it, fork it, build on it.
+This project is licensed under the [MIT License](./LICENSE). Feel free to use it, fork it, and build on it.
