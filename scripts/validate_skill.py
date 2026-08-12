@@ -39,7 +39,8 @@ def main():
     if "first-contribution" in skill_dir:
         required_refs = [
             os.path.join(skill_dir, "references", "domain-categories.md"),
-            os.path.join(skill_dir, "references", "subcategory-map.md")
+            os.path.join(skill_dir, "references", "subcategory-map.md"),
+            os.path.join(skill_dir, "references", "pr-acceptance-checklist.md")
         ]
         for ref_path in required_refs:
             if not os.path.isfile(ref_path):

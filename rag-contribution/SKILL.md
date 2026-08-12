@@ -27,7 +27,15 @@ This skill follows the same four‑phase workflow as `first‑contribution` but 
 - `gh auth status` to check login. If not logged in, `gh auth login --scopes workflow`. (If SSH fails later, use `gh config set git_protocol https`).
 - `gh repo fork --clone` to instantly set up the repository locally.
 - Set up a virtual environment, run the test suite, apply the bug fix, and run tests again.
-- `gh pr create` to submit the PR directly from the terminal.
+
+## Phase 4.5 – RAG-Specific PR Quality Control
+- **Enforce `references/pr-acceptance-checklist.md`** just like the `first-contribution` skill.
+- **RAG Pre-checks:**
+  1. Ensure no large files (like `.chroma`, `.faiss`, or model checkpoints) are accidentally included in the commit.
+  2. If the bug fix involves LLM API calls, verify that the tests are **mocking** the API responses. Real API calls in CI will fail due to rate limits or missing API keys, causing the PR to be rejected.
+
+## Phase 5 – PR Submission
+- `gh pr create` to submit the PR directly from the terminal, strictly following any provided `.github/PULL_REQUEST_TEMPLATE.md`.
 
 ## References
 - `references/rag-evaluation-criteria.md`

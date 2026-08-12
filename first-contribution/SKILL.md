@@ -125,9 +125,17 @@ Once the user has picked an issue, guide them through the GitHub CLI (`gh`) auto
 4. Draft the fix, then **explain the diff back to the user line by line** rather than letting them submit something neither of you fully understands.
 5. Run the project's actual test suite locally (per `CONTRIBUTING.md` — pytest, jest, cargo test, etc.) before suggesting a PR.
 6. Commit the changes and push to the fork's branch.
-7. **Automated PR Creation:** Instruct the user to run `gh pr create --title "..." --body "..."` using the drafted title and description matching the project's style.
-8. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.
 
+## Phase 4.5 — Pre-PR Quality Control
+Before running `gh pr create`, you **MUST** read and enforce `references/pr-acceptance-checklist.md`.
+1. **Assignment Check (CRITICAL):** Run `gh issue view <issue>` to verify the user is officially assigned. Do NOT create a PR if they are not assigned. Bots will auto-close it.
+2. **Tests & Linting:** Ensure all local tests and linters (`CONTRIBUTING.md`) have been run and pass.
+3. **Commit Conventions:** Rewrite the commit message if it doesn't match the repo's history (e.g., Conventional Commits) and ensure it's signed (`git commit -s`) if a DCO is required.
+4. **PR Template:** If `.github/PULL_REQUEST_TEMPLATE.md` exists, strictly use it for the PR body.
+
+## Phase 5 — PR Submission and Iteration
+1. **Automated PR Creation:** Instruct the user to run `gh pr create --title "..." --body "..."` using the drafted title and description matching the project's style.
+2. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.
 ## A note on iterating this skill
 
 This skill is meant to be used repeatedly and refined based on what actually happens in real attempts (stale issues that slipped through, repos that turned out to be worse fits than the numbers suggested, PR conventions that weren't documented anywhere). When something in a real contribution attempt doesn't match what this skill predicted, that's a signal the checklist or scoring criteria should be updated — flag it back for a revision rather than treating it as a one-off surprise.
