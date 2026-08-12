@@ -3,7 +3,7 @@
   <p><strong>A fully automated Agent Skill that takes you from "I want to contribute" to a submitted Pull Request, instantly.</strong></p>
 
   <p>
-    <a href="https://github.com/chjnett/open_contribute/actions"><img src="https://img.shields.io/badge/build-passing-brightgreen?style=flat-square" alt="Build Status"></a>
+    <a href="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml"><img src="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
     <a href="https://github.com/chjnett/open_contribute/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square" alt="Platform">
@@ -34,6 +34,7 @@ This AI Skill was built because this exact scenario happens far too often. It ac
 - **Pre-PR Quality Control:** Enforces a rigid `pr-acceptance-checklist.md` to ensure your code has tests, proper formatting, and DCO sign-offs (`git commit -s`) *before* opening a PR.
 - **GitHub CLI Automation:** Zero manual tokens! Uses `gh` CLI to natively authenticate, fork, clone, and push without breaking a sweat.
 - **Smart Issue Triage:** Automatically filters out "good first issues" that have hidden assignees or linked PRs.
+- **PR Merge Reality Gate:** Measures whether outside PRs actually land — not just whether the repo looks active — so you find out before sinking time into a project where nothing from non-employees ever merges.
 - **Outreach Drafter:** Automatically drafts professional "claim comments" and community channel (Discord/Slack) outreach messages.
 
 ---
@@ -58,9 +59,17 @@ gh auth login --scopes workflow
 
 ## Quick Start / Installation
 
+This repo ships three skills. Pick whichever you want and swap the folder name below:
+
+| Folder | Responds in | Use for |
+| :--- | :--- | :--- |
+| `first-contribution` | English | Any open-source project |
+| `first-contribution-ko` | Korean | Any open-source project |
+| `rag-contribution` | English | RAG projects (LangChain, LlamaIndex) |
+
 ### Easiest — Paste this prompt to your coding agent
 
-Copy the block below into Claude Code or any SKILL.md-aware agent. (Swap the folder name for `first-contribution-ko` if you want the Korean-responding version).
+Copy the block below into Claude Code or any SKILL.md-aware agent.
 
 ```text
 Install the first-contribution agent skill for me, and nothing else.
@@ -75,6 +84,28 @@ Install the first-contribution agent skill for me, and nothing else.
 ```
 
 Restart your agent to pick up the newly installed skill.
+
+### Claude Code — copy the folder yourself
+
+Install to `~/.claude/skills/` (global) or `.claude/skills/` (per-project):
+
+```bash
+git clone https://github.com/chjnett/open_contribute /tmp/open_contribute
+cp -r /tmp/open_contribute/first-contribution ~/.claude/skills/first-contribution
+```
+
+### Claude.ai / Cowork — upload a packaged `.skill`
+
+Download the `.skill` file for the variant you want from the
+[latest release](https://github.com/chjnett/open_contribute/releases/latest) and upload
+it under Settings → Skills. You can also upload the `SKILL.md` + `references/` folder
+directly.
+
+To build the `.skill` files yourself from a clone:
+
+```bash
+bash scripts/package_skill.sh
+```
 
 ---
 

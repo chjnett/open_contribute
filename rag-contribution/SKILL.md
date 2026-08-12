@@ -1,6 +1,7 @@
 ---
 name: rag-contribution
-version: "1.0.0"
+metadata:
+  version: "1.0.1"
 description: Guides a developer through contributing to a Retrieval‑Augmented Generation (RAG) open‑source project (e.g., LangChain, LlamaIndex). It evaluates candidate repos, narrows down a good‑first issue, and walks through a bug‑fix or documentation contribution.
 ---
 
@@ -41,3 +42,4 @@ This skill follows the same four‑phase workflow as `first‑contribution` but 
 - `references/rag-evaluation-criteria.md`
 - `references/issue-triage-checklist.md`
 - `references/message-templates.md`
+- `references/pr-acceptance-checklist.md`

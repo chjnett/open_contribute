@@ -1,6 +1,7 @@
 ---
 name: first-contribution
-version: "1.2.0"
+metadata:
+  version: "1.2.1"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -18,25 +19,15 @@ Good-first-issue labels lie. Repos leave them on issues for months or years afte
 
 Don't skip straight to searching repos on a vague request like "help me find an open source project to contribute to." Get specific first — a recommendation built on guessed preferences wastes the later phases' precision.
 
-If the person hasn't already specified these in conversation, use a structured multiple-choice tool (`ask_user_input_v0`) to narrow down their preferences interactively. Cache answers to skip previously asked questions.
+If the person hasn't already specified these in conversation, use a structured multiple-choice tool (`ask_user_input_v0`) to narrow down their preferences interactively. Carry forward anything they've already answered instead of re-asking it.
 
-1️⃣ **관심 분야 선택** (Single select)
-   - Options from `references/domain-categories.md`.
+1. **Domain** (single select) — options from `references/domain-categories.md`. This is the highest-leverage question; people sustain contributions to things they'd use anyway.
+2. **Sub-area** (single select, dynamic) — load the matching list from `references/subcategory-map.md` based on the domain picked.
+3. **Language / stack** (single or multi select) — present the common stacks for that sub-area, plus "no preference."
+4. **Experience level** (single select) — first-ever PR / a few PRs, want something bigger / experienced, want a meaningful issue.
+5. **Contribution type** (multi select) — docs & README, type hints & code cleanup, bug fix, small feature.
 
-2️⃣ **세부 영역 선택** (Single select, dynamic)
-   - Load the matching list from `references/subcategory-map.md`.
-
-3️⃣ **언어 / 스택 선택** (Single/Multi select)
-   - For each sub-category, present a curated list of common stacks.
-
-4️⃣ **경험 수준** (Single select)
-   - 첫 PR / 몇 개 PR 경험 / 숙련자
-
-5️⃣ **기여 유형** (Multi select)
-   - 문서/README 수정
-   - 타입 힌트 / 코드 정리
-   - 버그 수정
-   - 작은 기능 추가
+Don't run all five as a rigid interview. Skip any the person has already answered, and if they arrive with a repo already in mind, go straight to Phase 2 with that repo as a candidate.
 
 ## Phase 2 — Evaluate candidate repositories
 
@@ -50,14 +41,6 @@ if [[ ! "${owner}/${repo}" =~ $repo_regex ]]; then
   echo "Invalid repository identifier: ${owner}/${repo}"
   exit 1
 fi
-curl -s "https://api.github.com/repos/{owner}/{repo}"
-# -> stargazers_count, open_issues_count, pushed_at (recency), archived (must be false)
-
-curl -s "https://api.github.com/search/issues?q=repo:{owner}/{repo}+label:%22good+first+issue%22+state:open"
-# -> total_count of currently-open good-first-issues
-```
-
-```bash
 curl -s "https://api.github.com/repos/{owner}/{repo}"
 # -> stargazers_count, open_issues_count, pushed_at (recency), archived (must be false)
 
@@ -136,6 +119,7 @@ Before running `gh pr create`, you **MUST** read and enforce `references/pr-acce
 ## Phase 5 — PR Submission and Iteration
 1. **Automated PR Creation:** Instruct the user to run `gh pr create --title "..." --body "..."` using the drafted title and description matching the project's style.
 2. After a maintainer responds with review feedback, help iterate quickly, but keep the user in the loop on *why* changes are being made, not just applying suggestions blindly.
+
 ## A note on iterating this skill
 
 This skill is meant to be used repeatedly and refined based on what actually happens in real attempts (stale issues that slipped through, repos that turned out to be worse fits than the numbers suggested, PR conventions that weren't documented anywhere). When something in a real contribution attempt doesn't match what this skill predicted, that's a signal the checklist or scoring criteria should be updated — flag it back for a revision rather than treating it as a one-off surprise.

@@ -1,48 +1,49 @@
-# 서브카테고리 매핑 (Domain -> Subcategory)
+# Subcategory Map (Domain -> Subcategory)
 
-프론트엔드:
+Use as the option list for Phase 1, question 2. Load only the branch matching the
+domain the person picked — showing the whole tree defeats the point of narrowing.
+
+Frontend:
   - React
   - Vue
   - Angular
   - Svelte
 
-백엔드:
+Backend:
   - Node.js (Express)
   - Python (Django / Flask)
   - Java (Spring Boot)
   - Go (Gin)
 
-보안:
+Security:
   - OWASP Top 10
-  도구:
-    - Burp Suite
-    - ZAP
-  - 인증 / JWT
-  - 암호화
+  - Tooling (Burp Suite, ZAP)
+  - Authentication / JWT
+  - Cryptography
 
 AI / RAG:
   - LangChain (Python)
   - LlamaIndex (Python)
   - Haystack (Python)
-  - 벡터 DB (Milvus, Pinecone)
+  - Vector databases (Milvus, Pinecone)
 
-데이터베이스:
+Databases:
   - PostgreSQL
   - MySQL
   - MongoDB
   - Redis
 
-모바일:
+Mobile:
   - React Native
   - Flutter
   - Android (Kotlin)
   - iOS (Swift)
 
-게임:
+Games:
   - Unity (C#)
   - Unreal (C++)
 
-인프라 / DevOps:
+Infrastructure / DevOps:
   - Docker / Kubernetes
   - Terraform
   - CI/CD (GitHub Actions, GitLab CI)
