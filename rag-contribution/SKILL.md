@@ -1,7 +1,7 @@
 ---
 name: rag-contribution
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 description: Guides a developer through contributing to a Retrieval‑Augmented Generation (RAG) open‑source project (e.g., LangChain, LlamaIndex). It evaluates candidate repos, narrows down a good‑first issue, and walks through a bug‑fix or documentation contribution.
 ---
 
@@ -44,3 +44,9 @@ This skill follows the same four‑phase workflow as `first‑contribution` but 
 - `references/issue-triage-checklist.md`
 - `references/message-templates.md`
 - `references/pr-acceptance-checklist.md`
+
+## Phase 6 – Getting the PR reviewed
+- Check `.github/CODEOWNERS` for the team that owns the *feature*, not just the file path — coverage is often incomplete and GitHub can only auto-request owners it can match.
+- Tell the issue thread the PR is up; issue watchers don't follow your fork automatically.
+- Then wait. One to two weeks of silence on a large repo is normal. A nudge gets **one** comment carrying new information, never a bare "any update?".
+- `references/message-templates.md` §4-6 covers the wording, the community-channel etiquette, and the anti-patterns that lose you a review.

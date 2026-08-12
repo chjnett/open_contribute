@@ -51,3 +51,55 @@ These aren't fill-in-the-blank templates — every message should be written spe
 - Over-explaining implementation details already visible in the diff
 - Under-explaining *why* a non-obvious choice was made
 - Skipping the "how tested" section even for small changes — reviewers ask for it anyway if it's missing, costing a review round-trip
+
+## 4. Getting the PR in front of the right people
+
+Everything in this section is about **routing and clarity**, not pressure. A PR stalls far more often because nobody who owns that code knows it exists than because they saw it and declined.
+
+### Route by CODEOWNERS — by feature, not just by path
+
+Check `.github/CODEOWNERS` for the team that owns the *feature*, not only the exact file you touched. Path coverage is frequently incomplete, and GitHub can only auto-request owners it can match.
+
+Worked example — `grafana/grafana#130614` changed `public/app/core/utils/shortLinks.ts`. CODEOWNERS assigns the short URL feature to `@grafana/sharing-squad` across four paths (`/apps/shorturl/`, `/pkg/services/shorturls/`, the RTK client, the OpenAPI spec) — but that one utils file matches none of them, so the PR was auto-routed to four frontend reviewers instead, and the team that owns short URLs never heard about it.
+
+When you find this gap, say so plainly in a single comment:
+
+> "CODEOWNERS routes the short URL paths to @{team}, but `{file}` isn't covered by a rule so this didn't reach them — flagging in case it belongs on their queue."
+
+That is useful information for the maintainers, not a demand. One mention, with the reason attached.
+
+### Tell the issue thread the PR is up
+
+People watching the issue are not automatically watching your fork's PR. One short comment on the issue closes that gap and lets anyone hitting the same bug find the fix.
+
+> "Opened #{pr} for this — {one clause on the approach}."
+
+### Community channels
+
+If `CONTRIBUTING.md` links a Slack/Discord/forum (Grafana links a community Slack and forums), a single post is reasonable **after** the PR has sat unreviewed for a while. Link it, one sentence of context, and ask whether it's on the right team's radar. Post once, in the right channel, and never `@here`/`@everyone`.
+
+## 5. The one nudge
+
+If nothing happens, you get **one** follow-up, and it should carry new information.
+
+**Wait first.** On a large repo, one to two weeks of silence is normal, not a snub — external PR CI is often held for maintainer approval, so "no checks running" is not evidence of neglect either.
+
+**Make the nudge worth reading.** Something changed, or you resolved something:
+
+> "Rebased on main and CI is green. Happy to adjust the approach if the `bootData` route isn't what you'd prefer."
+
+**Then stop.** If a second nudge is needed weeks later, prefer a different channel (the community Slack) over a second comment on the same thread. Maintainers are often volunteers with a queue in the hundreds; silence is usually bandwidth, not rejection.
+
+## 6. Things that lose you the review
+
+These read as pressure and reliably backfire:
+
+- `@`-mentioning several maintainers at once, or anyone with no connection to the area
+- "Any update?" / "bump" / "please review" with no new information
+- Following up within days, or repeatedly
+- DMing a maintainer who hasn't invited it
+- Commenting on unrelated issues or PRs to draw attention to yours
+- Opening a duplicate issue because the first one got no traction
+- Re-opening the argument after a maintainer has declined a direction
+
+The reliable levers are the boring ones: keep the PR small, keep it mergeable, reply to review comments quickly, and make the reviewer's job take two minutes instead of twenty.

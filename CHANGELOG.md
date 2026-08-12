@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-08-13
+
+### Added
+- **Getting a PR reviewed, without becoming the contributor maintainers dread**
+  (message templates §4-6, Phase 5).
+
+  A PR stalls far more often because nobody who owns that code knows it exists than
+  because they saw it and declined, so the guidance is about routing and clarity rather
+  than pressure:
+
+  - **Route by CODEOWNERS, by feature rather than path.** Coverage is frequently
+    incomplete and GitHub can only auto-request owners it can match. On
+    `grafana/grafana#130614` the short URL feature belongs to `@grafana/sharing-squad`
+    across four paths, but the changed `public/app/core/utils/shortLinks.ts` matched none
+    of them — so it routed to four unrelated frontend reviewers and the owning team never
+    heard about it. One comment naming the team and the reason is useful information, not
+    a demand.
+  - **Tell the issue thread the PR is up** — issue watchers don't follow your fork.
+  - **Community channels** only after a real wait, once, in the right channel, never
+    `@here`.
+  - **The one nudge**: wait one to two weeks (external-PR CI held for approval is not
+    neglect), then a single comment carrying new information — "rebased, CI green" — and
+    then stop.
+  - An explicit list of what loses you the review: mass `@`-mentions, "bump" with no new
+    information, repeat nudges, unsolicited DMs, cross-posting on unrelated threads,
+    duplicate issues, and re-litigating a declined direction.
+
+- `rag-contribution` gains a Phase 6 covering the same ground.
+
 ## [1.6.0] - 2026-08-13
 
 ### Changed
