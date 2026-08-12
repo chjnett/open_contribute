@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-08-13
+
+Lessons from actually submitting a PR — grafana/grafana#130614.
+
+### Added
+- **Sign-off, signatures, and CLAs are three different things** (PR checklist §4). The
+  checklist previously covered only DCO `git commit -s`. A repo can separately require
+  *verified* GPG/SSH signatures, which `-s` does not satisfy, and a CLA, which is a legal
+  agreement. **Never sign a CLA on the user's behalf** — surface the link and say only
+  they can sign it.
+- **Committing without a clone** (PR checklist §4b). The REST Contents API produces
+  **unsigned** commits; GraphQL `createCommitOnBranch` produces GitHub-signed `Verified`
+  ones. On a repo enforcing signatures the REST route silently creates a blocked PR.
+  Also: never reset a PR branch to its base as a separate step — a branch with zero
+  commits ahead of base gets the PR auto-closed by GitHub (`gh pr reopen` recovers it).
+- **Existing tests may encode the bug** (PR checklist §1b). A green suite doesn't mean
+  correct behaviour. grafana#130567's tests asserted the malformed output
+  (`expect(...).toBe('...?orgId=org-5')`), which is how it shipped. Fix those assertions
+  as part of the change, and grep for other callers — two unrelated tests went through
+  the same code path and would have broken.
+- **What to do when tests genuinely can't run** (PR checklist §1). Check `df -h` before
+  starting, never fill the user's disk to satisfy a checklist item, and if you skip local
+  tests say in the PR which files went unexecuted, why, and what the reviewer should
+  scrutinise.
+- **Reading checks after opening** (PR checklist §6). On external PRs most CI is held for
+  maintainer approval — that's the normal flow, not a failure. Separate what the user must
+  act on from what is merely waiting.
+- Phase 4 now says to check `df -h` before cloning and points at the no-clone route.
+
+### Changed
+- §0 no longer implies every repo blocks unassigned PRs — Grafana accepts them; check the
+  repo's actual convention.
+
 ## [1.4.0] - 2026-08-13
 
 ### Added

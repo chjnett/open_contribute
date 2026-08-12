@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.4.0"
+  version: "1.5.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -111,6 +111,8 @@ Once the user has picked an issue, guide them through the GitHub CLI (`gh`) auto
 
 1. **Authentication Check:** Ask the user to run `gh auth status`. If not logged in or missing scopes, instruct them to run `gh auth login --scopes workflow` and follow the interactive prompts (use the web browser option for easiest setup). If they encounter SSH host key errors during cloning, tell them to run `gh config set git_protocol https`.
 2. **Automated Fork & Clone:** Instead of manual cloning, instruct the user to run `gh repo fork {owner}/{repo} --clone`. This single command creates the fork on their account, clones it locally, and sets up `origin` and `upstream` remotes perfectly.
+
+   **Check `df -h` first.** Monorepos like Grafana need several GB for the clone plus its install, and filling the user's disk is worse than any checklist item. When space or time won't allow it and the change is small, you can skip the clone entirely: fetch the specific files from `raw.githubusercontent.com`, edit them locally, and commit through the API — but use GraphQL `createCommitOnBranch`, not the REST Contents API, since only the former produces the `Verified` commits some repos require. See `references/pr-acceptance-checklist.md` §4b, and be explicit in the PR about any tests you could not run.
 3. Locate the exact files relevant to the issue — don't try to explain the whole codebase, scope down to what's needed.
 4. Draft the fix, then **explain the diff back to the user line by line** rather than letting them submit something neither of you fully understands.
 5. Run the project's actual test suite locally (per `CONTRIBUTING.md` — pytest, jest, cargo test, etc.) before suggesting a PR.
