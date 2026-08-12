@@ -1,10 +1,10 @@
 <div align="center">
-  <h1>First-Contribution AI Skill</h1>
-  <p><strong>A fully automated Agent Skill that takes you from "I want to contribute" to a submitted Pull Request, instantly.</strong></p>
+  <h1>first-contribution</h1>
+  <p><strong>An Agent Skill that gets you from "I want to contribute to open source" to a submitted pull request — and refuses to send you at issues that are already dead.</strong></p>
 
   <p>
     <a href="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml"><img src="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
-    <a href="https://github.com/chjnett/open_contribute/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+    <a href="https://github.com/chjnett/open_contribute/releases/latest"><img src="https://img.shields.io/github/v/release/chjnett/open_contribute?style=flat-square&color=1a7f37" alt="Latest release"></a>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square" alt="Platform">
   </p>
@@ -14,62 +14,64 @@
 
 [한국어](./README.ko.md) | English
 
-## Overview
+## The problem
 
-`good first issue` labels lie more often than you'd think. On popular repositories, an issue labeled as beginner-friendly is usually already claimed, fixed in a different PR, or quietly resolved. You find it, get excited, read the code, and then discover a linked PR sitting there from six months ago. 
+`good first issue` labels lie. On a popular repo the labelled issue you find is usually already claimed, already fixed by a different PR, or quietly resolved with nobody closing the ticket. You read the code, get invested, and then find a linked PR from six months ago.
 
-<div align="center">
-  <img src="./assets/issue_stats_pie.png" alt="Reality of Good First Issues" width="600">
-</div>
-
-This AI Skill was built because this exact scenario happens far too often. It acts as an autonomous guide within your AI coding editor (Claude Code, Cursor, Cowork) to intelligently filter out "dead" issues, handle all the Git/GitHub CLI overhead, and optimize your PR for immediate acceptance by maintainers.
+That is the visible half. The invisible half is worse: a repo can look thriving — daily commits, hundreds of merges a quarter — while merging almost nothing from anyone outside its core team. Stars and activity don't tell you whether *your* PR will land.
 
 <div align="center">
-  <img src="./assets/time_saved_bar.png" alt="Manual vs Automated Time Comparison" width="700">
+  <img src="./assets/merge_gate.png" alt="Share of merged PRs from outside each repo's top-5 authors, 15 repositories measured" width="820">
 </div>
 
-## Key Features
+Same day, same method: `grafana/grafana` merges 70% of its PRs from outside its five most frequent authors. `chroma-core/chroma` merges 8% — and every one of the 17 PRs opened against its good-first-issues had failed to merge. Both look healthy from the outside.
 
-- **Domain-Specific Targeting:** Specialized flows for standard open-source contributions (`first-contribution`) and AI/RAG specific projects (`rag-contribution`).
-- **Pre-PR Quality Control:** Enforces a rigid `pr-acceptance-checklist.md` to ensure your code has tests, proper formatting, and DCO sign-offs (`git commit -s`) *before* opening a PR.
-- **GitHub CLI Automation:** Zero manual tokens! Uses `gh` CLI to natively authenticate, fork, clone, and push without breaking a sweat.
-- **Smart Issue Triage:** Automatically filters out "good first issues" that have hidden assignees or linked PRs.
-- **PR Merge Reality Gate:** Measures whether outside PRs actually land — not just whether the repo looks active — so you find out before sinking time into a project where nothing from non-employees ever merges.
-- **Outreach Drafter:** Automatically drafts professional "claim comments" and community channel (Discord/Slack) outreach messages.
+Then there's the race. Anything recent, well-scoped and labelled tends to be claimed within hours.
 
----
+<div align="center">
+  <img src="./assets/triage_attrition.png" alt="Share of candidate issues that already had a linked PR" width="820">
+</div>
 
-## Prerequisites
+This skill measures all of that before it recommends anything.
 
-This skill fully automates the GitHub workflow (forking, cloning, and PR creation) without requiring you to manually generate Personal Access Tokens (PAT). To enable this, you must have the **GitHub CLI (`gh`)** installed and authenticated.
+## What's in the box
 
-- **Mac:** `brew install gh`
-- **Windows:** `winget install --id GitHub.cli`
-- **Linux:** `sudo apt install gh`
-
-After installing, run the following command to authenticate and ensure you have permissions to push workflow files:
-
-```bash
-gh auth login --scopes workflow
-```
-
-> **Note:** Follow the prompts to authenticate via your web browser. (If you get SSH host key errors later, try running `gh config set git_protocol https`).
-
----
-
-## Quick Start / Installation
-
-This repo ships three skills. Pick whichever you want and swap the folder name below:
-
-| Folder | Responds in | Use for |
+| Skill | Responds in | Use for |
 | :--- | :--- | :--- |
 | `first-contribution` | English | Any open-source project |
 | `first-contribution-ko` | Korean | Any open-source project |
 | `rag-contribution` | English | RAG projects (LangChain, LlamaIndex) |
 
-### Easiest — Paste this prompt to your coding agent
+Each is a self-contained Agent Skill: a `SKILL.md` plus a `references/` folder loaded on demand.
 
-Copy the block below into Claude Code or any SKILL.md-aware agent.
+## How it works
+
+1. **Narrows down what you want** — domain, sub-area, stack, experience level, contribution type — before searching, so the recommendation rests on your preferences rather than a guess.
+2. **Filters on availability first.** A repo with no currently-open, unassigned contribution issues can't produce a contribution today, and that check is one cheap API call. Only the survivors get the expensive evaluation.
+3. **Runs the PR merge reality gate** — the share of open PRs sitting 90+ days, and the share of merges from outside the top-5 authors. You see the numbers and decide; the skill never silently drops a repo.
+4. **Triages every candidate issue** against an 8-step checklist: internal-only notices, linked PRs, assignees, resolving comments, claim pile-up, age — and finally whether the defect *still exists in current code*, because a fix can land without anyone closing the issue.
+5. **Drafts the outreach** — claim comments, community-channel messages, PR descriptions — in the project's own register.
+6. **Walks the contribution** — `gh`-based fork and clone, scoped edits, the project's real test suite, a pre-PR quality checklist covering DCO, signatures and CLAs, then submission and follow-up etiquette.
+
+## Prerequisites
+
+The skill drives forking, cloning and PR creation through the **GitHub CLI (`gh`)**, so no manual personal access tokens.
+
+- **Mac:** `brew install gh`
+- **Windows:** `winget install --id GitHub.cli`
+- **Linux:** `sudo apt install gh`
+
+```bash
+gh auth login --scopes workflow
+```
+
+> If you hit SSH host key errors later, run `gh config set git_protocol https`.
+
+## Install
+
+### Easiest — paste this prompt to your coding agent
+
+Swap the folder name for whichever variant you want.
 
 ```text
 Install the first-contribution agent skill for me, and nothing else.
@@ -83,11 +85,9 @@ Install the first-contribution agent skill for me, and nothing else.
    install path and stop.
 ```
 
-Restart your agent to pick up the newly installed skill.
+Restart your agent to pick up the skill.
 
 ### Claude Code — copy the folder yourself
-
-Install to `~/.claude/skills/` (global) or `.claude/skills/` (per-project):
 
 ```bash
 git clone https://github.com/chjnett/open_contribute /tmp/open_contribute
@@ -96,22 +96,15 @@ cp -r /tmp/open_contribute/first-contribution ~/.claude/skills/first-contributio
 
 ### Claude.ai / Cowork — upload a packaged `.skill`
 
-Download the `.skill` file for the variant you want from the
-[latest release](https://github.com/chjnett/open_contribute/releases/latest) and upload
-it under Settings → Skills. You can also upload the `SKILL.md` + `references/` folder
-directly.
-
-To build the `.skill` files yourself from a clone:
+Download the variant you want from the [latest release](https://github.com/chjnett/open_contribute/releases/latest) and upload it under Settings → Skills. To build the files yourself from a clone:
 
 ```bash
 bash scripts/package_skill.sh
 ```
 
----
+## Use it
 
-## Usage
-
-Once installed, just describe what you want in plain language — the skill triggers on intent, no commands needed:
+The skill triggers on intent — no commands:
 
 > *"I want to start contributing to open source, help me find a good repo and issue"*
 
@@ -119,25 +112,37 @@ Once installed, just describe what you want in plain language — the skill trig
 
 > *"Find me a good-first-issue in a RAG/Python project."*
 
----
+## Field notes
+
+Every rule in the checklist was added after it cost a real run something. A few of the findings:
+
+- **`chroma-core/chroma`** — 29k stars, pushed daily, 11 open `good first issue`s. Also 275 of 452 open PRs sitting 90+ days, 8% of merges from outside the top-5 authors, and 17 of 17 PRs against those labelled issues failed to merge. The gate exists because of this repo.
+- **`deepset-ai/haystack`** — passes the gate comfortably, and its contribution labels are *empty*: 199 such issues total, zero open. An empty label on a healthy repo means "come back later," which is the opposite diagnosis from a rotten one.
+- **`argoproj/argo-cd#29051`** — 8 days old, unassigned, zero linked PRs, `severity:critical`. It passed every social check and had already been fixed by `v3.3.14`. That is why the checklist now verifies the defect against current code.
+- **`grafana/grafana#130567`** — found by this skill, root-caused to a namespace being used as an org ID, and submitted as [#130614](https://github.com/grafana/grafana/pull/130614). Its existing tests had asserted the buggy output, which is how the bug shipped.
+
+## Reproducing the charts
+
+Both images come only from measurements taken on 2026-08-12, with the method printed on each chart:
+
+```bash
+python3 scripts/generate_charts.py
+```
 
 ## Troubleshooting
 
-If you encounter issues during the `gh` authentication or PR creation process, refer to the following common solutions:
-
-| Error Message / Issue | Solution |
+| Error / symptom | Fix |
 | :--- | :--- |
-| **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | Your `gh` token lacks permission to push to repositories containing GitHub Actions. Fix it by running:<br>`gh auth refresh --scopes workflow` |
-| **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | `gh` is refusing to refresh because an old manual token is stuck in your environment. Clear it first:<br>`unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
-| **"Host key verification failed" (during clone)** | Your system is trying to use SSH and failing because keys aren't set up. Tell `gh` to default to HTTPS instead:<br>`gh config set git_protocol https` |
-
----
+| **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | Your `gh` token can't push to repos with GitHub Actions:<br>`gh auth refresh --scopes workflow` |
+| **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | An old token is stuck in your environment:<br>`unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
+| **"Host key verification failed"** during clone | SSH keys aren't set up; switch `gh` to HTTPS:<br>`gh config set git_protocol https` |
+| **"Commits must have verified signatures"** | The repo requires signed commits. `git commit -s` is DCO sign-off and does **not** satisfy this — you need a signing key, or commit via GraphQL `createCommitOnBranch`. |
+| **CLA check stays pending** | Only you can sign a CLA. Follow the bot's link from the PR itself; if the page renders blank, a content blocker is usually eating the agreement text. |
 
 ## Contributing
 
-We welcome contributions! 
-Built and refined in public while used for real-world contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that's exactly the feedback that improves the checklist.
+Built and refined in public while being used for real contributions. If it recommends a stale issue, misjudges a repo, or misses a project convention, open an issue — that feedback is what the checklist is made of.
 
 ## License
 
-This project is licensed under the [MIT License](./LICENSE). Feel free to use it, fork it, and build on it.
+[MIT](./LICENSE). Use it, fork it, build on it.

@@ -1,10 +1,10 @@
 <div align="center">
-  <h1>First-Contribution AI Skill</h1>
-  <p><strong>"기여하고 싶다"에서 실제 PR 제출까지 데려다주는 Agent Skill.</strong></p>
+  <h1>first-contribution</h1>
+  <p><strong>"오픈소스에 기여하고 싶다"에서 PR 제출까지 데려다주는 Agent Skill — 이미 죽은 이슈로 보내지 않습니다.</strong></p>
 
   <p>
     <a href="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml"><img src="https://github.com/chjnett/open_contribute/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a>
-    <a href="https://github.com/chjnett/open_contribute/issues"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+    <a href="https://github.com/chjnett/open_contribute/releases/latest"><img src="https://img.shields.io/github/v/release/chjnett/open_contribute?style=flat-square&color=1a7f37" alt="Latest release"></a>
     <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/badge/platform-Mac%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square" alt="Platform">
   </p>
@@ -14,62 +14,64 @@
 
 한국어 | [English](./README.md)
 
-## 개요
+## 문제
 
-`good first issue` 라벨은 생각보다 자주 거짓말을 합니다. 인기 레포일수록 초보자용이라고 붙은 이슈는 이미 누가 선점했거나, 다른 PR로 해결됐거나, 조용히 마무리됐는데 이슈만 안 닫힌 경우가 흔합니다. 신나서 코드를 읽기 시작했는데 6개월 전에 걸린 PR을 발견하는 식이죠.
+`good first issue` 라벨은 거짓말을 합니다. 인기 레포에서 찾은 라벨 이슈는 대개 이미 누가 선점했거나, 다른 PR로 고쳐졌거나, 조용히 해결됐는데 아무도 안 닫은 것입니다. 코드를 읽고 몰입한 뒤에야 6개월 전에 걸린 PR을 발견하죠.
 
-<div align="center">
-  <img src="./assets/issue_stats_pie.png" alt="good first issue의 현실" width="600">
-</div>
-
-이 스킬은 정확히 그 상황이 너무 자주 반복돼서 만들었습니다. AI 코딩 에디터(Claude Code, Cursor, Cowork) 안에서 자율 가이드로 동작하면서 죽은 이슈를 걸러내고, Git/GitHub CLI 작업을 대신 처리하고, 메인테이너가 바로 받아들일 수 있도록 PR을 다듬습니다.
+이건 그나마 눈에 보이는 절반입니다. 안 보이는 쪽이 더 나쁩니다 — 매일 커밋하고 분기당 수백 건을 머지하는 활발한 레포가, 정작 핵심 팀 바깥에서 온 PR은 거의 머지하지 않을 수 있습니다. 스타 수와 활동량은 **내 PR이 들어갈지**를 알려주지 않습니다.
 
 <div align="center">
-  <img src="./assets/time_saved_bar.png" alt="수동 작업 vs 자동화 시간 비교" width="700">
+  <img src="./assets/merge_gate.png" alt="레포별 상위 5명 밖 기여자의 머지 PR 비율, 15개 레포 실측" width="820">
 </div>
 
-## 주요 기능
+같은 날, 같은 방식으로 측정했습니다. `grafana/grafana`는 머지 PR의 70%가 상위 5명 밖에서 나옵니다. `chroma-core/chroma`는 8%이고, good-first-issue에 올라온 PR 17건이 **전부** 머지에 실패했습니다. 겉보기엔 둘 다 건강합니다.
 
-- **도메인별 분기:** 일반 오픈소스 기여(`first-contribution`)와 AI/RAG 프로젝트 전용(`rag-contribution`) 흐름을 각각 제공합니다.
-- **PR 제출 전 품질 점검:** `pr-acceptance-checklist.md`를 강제해서 테스트, 포매팅, DCO 서명(`git commit -s`)이 갖춰진 뒤에야 PR을 열게 합니다.
-- **GitHub CLI 자동화:** 토큰을 직접 만들 필요 없이 `gh`로 인증, 포크, 클론, 푸시까지 처리합니다.
-- **이슈 검증:** 숨은 담당자나 연결된 PR이 있는 `good first issue`를 자동으로 걸러냅니다.
-- **PR 머지 현실 게이트:** 겉보기 지표가 좋아도 외부인 PR이 실제로 머지되는지를 따로 측정해서, 승산 없는 레포에 시간을 쏟기 전에 알려줍니다.
-- **아웃리치 초안 작성:** 이슈 선점 코멘트와 Discord/Slack 커뮤니티 메시지 초안을 대신 써줍니다.
+그리고 경쟁이 있습니다. 최근에 올라온, 범위가 명확한, 라벨 붙은 이슈는 대개 몇 시간 안에 선점됩니다.
 
----
+<div align="center">
+  <img src="./assets/triage_attrition.png" alt="후보 이슈 중 이미 연결된 PR이 있던 비율" width="820">
+</div>
 
-## 사전 준비
+이 스킬은 무언가를 추천하기 전에 이것들을 전부 측정합니다.
 
-이 스킬은 포크, 클론, PR 생성까지 자동화하며, 개인 액세스 토큰(PAT)을 직접 만들 필요가 없습니다. 대신 **GitHub CLI (`gh`)** 가 설치되고 인증돼 있어야 합니다.
+## 구성
 
-- **Mac:** `brew install gh`
-- **Windows:** `winget install --id GitHub.cli`
-- **Linux:** `sudo apt install gh`
-
-설치 후 아래 명령으로 인증하세요. 워크플로 파일을 푸시할 권한까지 함께 받습니다:
-
-```bash
-gh auth login --scopes workflow
-```
-
-> **참고:** 안내에 따라 웹 브라우저로 인증하면 됩니다. (이후 SSH 호스트 키 오류가 나면 `gh config set git_protocol https`를 실행해보세요.)
-
----
-
-## 설치
-
-이 레포에는 스킬 3개가 들어있습니다. 원하는 걸 골라서 아래 폴더명만 바꿔 쓰세요:
-
-| 폴더 | 응답 언어 | 용도 |
+| 스킬 | 응답 언어 | 용도 |
 | :--- | :--- | :--- |
 | `first-contribution` | 영어 | 모든 오픈소스 프로젝트 |
 | `first-contribution-ko` | 한국어 | 모든 오픈소스 프로젝트 |
 | `rag-contribution` | 영어 | RAG 프로젝트 (LangChain, LlamaIndex) |
 
+각각 자체 완결형 Agent Skill입니다 — `SKILL.md`와 필요할 때 로드되는 `references/` 폴더.
+
+## 작동 방식
+
+1. **원하는 걸 먼저 좁힙니다** — 도메인, 세부 영역, 스택, 경험 수준, 기여 유형. 추측이 아니라 실제 선호에 기반한 추천이 나옵니다.
+2. **가용성부터 거릅니다.** 지금 열려있는 미할당 기여 이슈가 없는 레포는 오늘 기여를 만들 수 없고, 그 확인은 API 호출 한 번이면 끝납니다. 살아남은 곳만 비싼 평가로 넘어갑니다.
+3. **PR 머지 현실 게이트를 돌립니다** — 90일 이상 방치된 열린 PR 비율, 상위 5명 밖에서 온 머지 비율. 수치를 보여드리고 결정은 사용자가 합니다. 임의로 탈락시키지 않습니다.
+4. **모든 후보 이슈를 8단계 체크리스트로 검증합니다** — 내부 전용 공지, 연결된 PR, 담당자, 해결 코멘트, 선점 적체, 나이, 그리고 마지막으로 **버그가 현재 코드에 아직 있는지**. 아무도 이슈를 닫지 않은 채 수정만 들어가는 경우가 있기 때문입니다.
+5. **보낼 메시지를 대신 씁니다** — 선점 코멘트, 커뮤니티 채널 메시지, PR 설명을 그 프로젝트의 어투로.
+6. **기여를 끝까지 안내합니다** — `gh` 기반 포크·클론, 범위를 좁힌 수정, 프로젝트의 실제 테스트, DCO·서명·CLA를 다루는 제출 전 점검, 그리고 제출 후 후속 대응 매너까지.
+
+## 사전 준비
+
+포크, 클론, PR 생성을 **GitHub CLI (`gh`)** 로 처리하므로 개인 액세스 토큰을 직접 만들 필요가 없습니다.
+
+- **Mac:** `brew install gh`
+- **Windows:** `winget install --id GitHub.cli`
+- **Linux:** `sudo apt install gh`
+
+```bash
+gh auth login --scopes workflow
+```
+
+> 이후 SSH 호스트 키 오류가 나면 `gh config set git_protocol https`를 실행하세요.
+
+## 설치
+
 ### 가장 쉬운 방법 — 코딩 에이전트에 이 프롬프트를 붙여넣기
 
-아래 블록을 Claude Code나 SKILL.md를 지원하는 에이전트에 복사해서 넣으세요.
+원하는 변형으로 폴더명만 바꾸면 됩니다.
 
 ```text
 first-contribution-ko 에이전트 스킬만 설치해줘, 다른 건 건드리지 마.
@@ -83,11 +85,9 @@ first-contribution-ko 에이전트 스킬만 설치해줘, 다른 건 건드리�
 5. 다른 파일, 설정, 스킬은 건드리지 마. 최종 설치 경로만 알려주고 끝내.
 ```
 
-설치 후 에이전트를 재시작(혹은 새 세션 시작)하면 스킬을 인식합니다.
+설치 후 에이전트를 재시작하면 인식합니다.
 
 ### Claude Code — 직접 폴더 복사
-
-`~/.claude/skills/`(전역) 또는 `.claude/skills/`(프로젝트별)에 설치합니다:
 
 ```bash
 git clone https://github.com/chjnett/open_contribute /tmp/open_contribute
@@ -96,19 +96,15 @@ cp -r /tmp/open_contribute/first-contribution-ko ~/.claude/skills/first-contribu
 
 ### Claude.ai / Cowork — 패키징된 `.skill` 업로드
 
-[최신 릴리스](https://github.com/chjnett/open_contribute/releases/latest)에서 원하는 변형의 `.skill` 파일을 받아 설정 → 스킬에서 업로드하세요. `SKILL.md` + `references/` 폴더를 직접 업로드해도 됩니다.
-
-클론한 상태에서 `.skill` 파일을 직접 만들려면:
+[최신 릴리스](https://github.com/chjnett/open_contribute/releases/latest)에서 원하는 변형을 받아 설정 → 스킬에서 업로드하세요. 클론한 상태에서 직접 만들려면:
 
 ```bash
 bash scripts/package_skill.sh
 ```
 
----
-
 ## 사용하기
 
-설치 후엔 그냥 원하는 걸 자연스럽게 말하면 됩니다 — 별도 명령어 없이 의도만으로 트리거됩니다:
+명령어 없이 의도만으로 트리거됩니다:
 
 > *"오픈소스 기여 시작하고 싶어, 좋은 레포랑 이슈 찾아줘"*
 
@@ -116,23 +112,36 @@ bash scripts/package_skill.sh
 
 > *"RAG/Python 프로젝트 중에 good-first-issue 찾아줘"*
 
----
+## 실전 기록
+
+체크리스트의 모든 규칙은 실제 실행에서 대가를 치른 뒤에 추가됐습니다. 몇 가지만:
+
+- **`chroma-core/chroma`** — 스타 29k, 매일 푸시, 열린 `good first issue` 11건. 그런데 열린 PR 452건 중 275건이 90일 이상 방치, 머지 중 상위5 밖 비율 8%, 그리고 그 라벨 이슈들에 올라온 PR 17건이 전부 머지 실패. 게이트는 이 레포 때문에 생겼습니다.
+- **`deepset-ai/haystack`** — 게이트를 여유롭게 통과하는데 기여 라벨은 *비어* 있습니다. 누적 199건 전부 닫힘, 열린 건 0건. 건강한 레포의 빈 라벨은 "나중에 다시 오라"는 뜻이고, 썩은 라벨과는 정반대 진단입니다.
+- **`argoproj/argo-cd#29051`** — 8일 전 생성, 미할당, 연결 PR 0건, `severity:critical`. 모든 사회적 검증을 통과했지만 이미 `v3.3.14`가 고친 상태였습니다. 체크리스트가 현재 코드에서 버그를 확인하게 된 이유입니다.
+- **`grafana/grafana#130567`** — 이 스킬로 찾아냈고, namespace를 org ID로 쓰던 것을 근본 원인으로 특정해 [#130614](https://github.com/grafana/grafana/pull/130614)로 제출했습니다. 기존 테스트가 버그 출력을 기대값으로 박아둔 게 버그가 배포된 경로였습니다.
+
+## 차트 재현
+
+두 이미지는 2026-08-12에 실측한 데이터만 사용하며, 측정 방법이 차트에 함께 적혀 있습니다:
+
+```bash
+python3 scripts/generate_charts.py
+```
 
 ## 문제 해결
 
-`gh` 인증이나 PR 생성 과정에서 막히면 아래를 참고하세요:
-
-| 오류 메시지 / 증상 | 해결 방법 |
+| 오류 / 증상 | 해결 |
 | :--- | :--- |
-| **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | `gh` 토큰에 GitHub Actions가 포함된 레포로 푸시할 권한이 없습니다:<br>`gh auth refresh --scopes workflow` |
-| **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | 환경변수에 남은 예전 토큰 때문에 갱신이 거부되고 있습니다. 먼저 지우세요:<br>`unset GITHUB_TOKEN` (Mac/Linux) 또는 `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
-| **"Host key verification failed" (클론 중)** | SSH 키가 설정되지 않았는데 SSH로 시도하고 있습니다. HTTPS를 기본으로 바꾸세요:<br>`gh config set git_protocol https` |
-
----
+| **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | `gh` 토큰에 Actions 포함 레포 푸시 권한이 없습니다:<br>`gh auth refresh --scopes workflow` |
+| **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | 환경변수에 예전 토큰이 남아 있습니다:<br>`unset GITHUB_TOKEN` (Mac/Linux) 또는 `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
+| 클론 중 **"Host key verification failed"** | SSH 키가 설정되지 않았습니다. HTTPS로 전환:<br>`gh config set git_protocol https` |
+| **"Commits must have verified signatures"** | 서명된 커밋을 요구하는 레포입니다. `git commit -s`는 DCO sign-off라 이걸 **충족하지 않습니다** — 서명 키가 필요하거나, GraphQL `createCommitOnBranch`로 커밋하세요. |
+| CLA 체크가 계속 pending | CLA는 본인만 서명할 수 있습니다. PR에 달린 봇 링크로 들어가세요. 화면이 비어 보이면 대개 콘텐츠 차단기가 약관 텍스트를 막고 있는 것입니다. |
 
 ## 기여
 
-실제로 기여하면서 실사용 결과를 바탕으로 공개적으로 계속 다듬는 중입니다. 죽은 이슈를 추천하거나, 레포 판단이 틀리거나, 프로젝트 관례를 놓치는 경우를 발견하시면 이슈로 알려주세요 — 정확히 그런 피드백이 체크리스트를 더 정교하게 만듭니다.
+실제 기여에 쓰면서 공개적으로 다듬고 있습니다. 죽은 이슈를 추천하거나, 레포 판단이 틀리거나, 프로젝트 관례를 놓치면 이슈로 알려주세요 — 체크리스트는 그런 피드백으로 만들어졌습니다.
 
 ## 라이선스
 

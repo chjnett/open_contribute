@@ -1,74 +1,109 @@
+#!/usr/bin/env python3
+"""Charts for the open_contribute README, built only from measurements taken 2026-08-12."""
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import seaborn as sns
-import os
+from matplotlib.patches import Patch
 
-# Set style for professional look
-sns.set_theme(style="whitegrid", context="talk")
-plt.rcParams['font.family'] = 'sans-serif'
+INK = "#1f2328"
+MUTED = "#59636e"
+GREEN = "#1a7f37"
+RED = "#cf222e"
+GREY = "#d1d9e0"
 
-# Create assets directory if it doesn't exist
-os.makedirs('assets', exist_ok=True)
+plt.rcParams.update({
+    "font.family": "DejaVu Sans",
+    "figure.facecolor": "white",
+    "axes.facecolor": "white",
+    "text.color": INK,
+    "axes.labelcolor": INK,
+    "xtick.color": MUTED,
+    "ytick.color": MUTED,
+    "axes.edgecolor": GREY,
+})
 
-def generate_pie_chart():
-    # Data: Truth about "Good First Issues"
-    labels = ['Actually Available\n& Actionable (18%)', 'Stale/Abandoned (35%)', 'Already Claimed (47%)']
-    sizes = [18, 35, 47]
-    colors = ['#2ea043', '#8b949e', '#d29922']
-    explode = (0.1, 0, 0)  # explode 1st slice
+# ---------------------------------------------------------------- chart 1
+# Share of merged PRs NOT authored by the repo's top-5 most frequent authors,
+# bots excluded. One sample of up to 100 recently-merged PRs per repo.
+repos = [
+    ("grafana/grafana", 70), ("prometheus/prometheus", 66), ("argoproj/argo-cd", 59),
+    ("run-llama/llama_index", 50), ("deepset-ai/haystack", 45),
+    ("kubernetes-sigs/kustomize", 41), ("milvus-io/milvus", 38),
+    ("Unstructured-IO/unstructured", 36), ("aquasecurity/trivy", 32),
+    ("goharbor/harbor", 32), ("qdrant/qdrant", 29), ("langchain-ai/langchain", 23),
+    ("weaviate/weaviate", 21), ("helm/helm", 13), ("chroma-core/chroma", 8),
+]
+THRESHOLD = 25
+repos.sort(key=lambda r: r[1])
+names = [r[0] for r in repos]
+vals = [r[1] for r in repos]
+colors = [GREEN if v >= THRESHOLD else RED for v in vals]
 
-    fig, ax = plt.subplots(figsize=(8, 6))
-    wedges, texts, autotexts = ax.pie(sizes, explode=explode, labels=labels, colors=colors,
-                                      autopct='%1.0f%%', shadow=False, startangle=140)
+fig, ax = plt.subplots(figsize=(11, 7))
+bars = ax.barh(names, vals, color=colors, height=0.68, zorder=3)
+ax.axvline(THRESHOLD, color=MUTED, lw=1.3, ls="--", zorder=1)
+ax.text(THRESHOLD + 1, -0.95, f"{THRESHOLD}% — healthy floor", fontsize=10,
+        color=MUTED, va="center", style="italic")
 
-    # Styling texts
-    plt.setp(autotexts, size=14, weight="bold", color="white")
-    plt.setp(texts, size=12)
+for b, v in zip(bars, vals):
+    ax.text(v + 2.2, b.get_y() + b.get_height() / 2, f"{v}%",
+            va="center", fontsize=10.5, color=INK, fontweight="bold", zorder=4)
 
-    ax.set_title('The Reality of "Good First Issue" Labels', fontsize=18, weight='bold', pad=20)
-    plt.tight_layout()
-    plt.savefig('assets/issue_stats_pie.png', dpi=300, transparent=True)
-    plt.close()
+ax.set_xlim(0, 80)
+ax.set_xlabel("Share of merged PRs from outside the top-5 authors", fontsize=11, labelpad=10)
+ax.set_title("Do outside pull requests actually get merged?",
+             fontsize=16, fontweight="bold", pad=26, loc="left")
+ax.text(0, 1.035, "Bots excluded. One sample of up to 100 recently-merged PRs per repo, measured 2026-08-12.",
+        transform=ax.transAxes, fontsize=10, color=MUTED)
+ax.spines[["top", "right", "left"]].set_visible(False)
+ax.tick_params(axis="y", length=0, labelsize=10.5)
+ax.xaxis.grid(True, color=GREY, lw=0.7)
+ax.set_axisbelow(True)
+ax.legend(handles=[Patch(facecolor=GREEN, label="Passes the gate"),
+                   Patch(facecolor=RED, label="Warning")],
+          loc="lower right", frameon=False, fontsize=10.5)
+fig.tight_layout()
+fig.savefig("assets/merge_gate.png", dpi=170, bbox_inches="tight")
+plt.close(fig)
 
-def generate_bar_chart():
-    # Data: Time comparison
-    categories = ['Setup & Auth', 'Find Issue', 'Fork & Clone', 'Create PR']
-    manual_times = [8, 15, 3, 5]  # ~31 mins total
-    automated_times = [1, 2, 0.5, 0.5]  # ~4 mins total
+# ---------------------------------------------------------------- chart 2
+# Attrition when triaging candidate issues: how many still had no linked PR.
+fig, ax = plt.subplots(figsize=(11, 4.2))
+groups = [
+    ("Contribution-labelled\n6 infra repos, since 2025-01", 40, 6),
+    ("Recent unassigned bugs\n7 infra repos, since 2026-06-15", 121, 37),
+]
+y = [1.0, 0.0]
+for (label, total, clean), yy in zip(groups, y):
+    ax.barh(yy, total, color=GREY, height=0.5, zorder=3)
+    ax.barh(yy, clean, color=GREEN, height=0.5, zorder=4)
+    taken = total - clean
+    ax.text(total + 3, yy, f"{taken} of {total} already taken  ·  {taken*100//total}%",
+            va="center", fontsize=11.5, color=INK, fontweight="bold", zorder=5)
+    ax.text(clean + 3 if clean < 20 else clean / 2, yy,
+            f"{clean} open", va="center", ha="left" if clean < 20 else "center",
+            fontsize=10.5, color=INK if clean < 20 else "white",
+            fontweight="bold", zorder=5)
 
-    x = range(len(categories))
-    width = 0.35
+ax.set_yticks(y)
+ax.set_yticklabels([g[0] for g in groups], fontsize=10.5)
+ax.set_ylim(-0.55, 1.55)
+ax.set_xlim(0, 215)
+ax.set_xlabel("Candidate issues screened", fontsize=11, labelpad=8)
+ax.set_title("Most candidates are already taken — labelled ones most of all",
+             fontsize=15.5, fontweight="bold", pad=64, loc="left")
+ax.text(0, 1.245, "Every candidate checked for a linked PR via the issue timeline. Measured 2026-08-12.",
+        transform=ax.transAxes, fontsize=10, color=MUTED)
+ax.spines[["top", "right", "left"]].set_visible(False)
+ax.tick_params(axis="y", length=0)
+ax.xaxis.grid(True, color=GREY, lw=0.7)
+ax.set_axisbelow(True)
+ax.legend(handles=[Patch(facecolor=GREEN, label="No linked PR — still claimable"),
+                   Patch(facecolor=GREY, label="Already had a linked PR")],
+          loc="lower left", bbox_to_anchor=(0, 1.03), ncol=2,
+          frameon=False, fontsize=10.5)
+fig.tight_layout()
+fig.savefig("assets/triage_attrition.png", dpi=170, bbox_inches="tight")
+plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    
-    # Plotting
-    rects1 = ax.bar([i - width/2 for i in x], manual_times, width, label='Manual Workflow', color='#d73a49')
-    rects2 = ax.bar([i + width/2 for i in x], automated_times, width, label='Open Contribute (Automated)', color='#2ea043')
-
-    # Add labels and title
-    ax.set_ylabel('Time (Minutes)', fontsize=14, weight='bold')
-    ax.set_title('Time to First PR: Manual vs Automated', fontsize=18, weight='bold', pad=20)
-    ax.set_xticks(x)
-    ax.set_xticklabels(categories, fontsize=12)
-    ax.legend()
-
-    # Add value labels on top of bars
-    def autolabel(rects):
-        for rect in rects:
-            height = rect.get_height()
-            ax.annotate(f'{height}m',
-                        xy=(rect.get_x() + rect.get_width() / 2, height),
-                        xytext=(0, 3),  # 3 points vertical offset
-                        textcoords="offset points",
-                        ha='center', va='bottom', fontsize=11)
-
-    autolabel(rects1)
-    autolabel(rects2)
-
-    plt.tight_layout()
-    plt.savefig('assets/time_saved_bar.png', dpi=300, transparent=True)
-    plt.close()
-
-if __name__ == '__main__':
-    generate_pie_chart()
-    generate_bar_chart()
-    print("Charts successfully generated in assets/ directory.")
+print("wrote assets/merge_gate.png and assets/triage_attrition.png")
