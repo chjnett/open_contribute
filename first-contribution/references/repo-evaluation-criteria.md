@@ -15,7 +15,9 @@ Check close rate roughly by comparing `open_issues_count` against how recently i
 - Are PRs from external contributors (not just the core team) getting merged recently? Look at the last 10-20 merged PRs and their authors.
 - A project that only merges its own employees' PRs is technically "active" but not actually welcoming outside contributors.
 
-## 3. PR merge reality (run this before triaging issues)
+## 3. PR merge reality (run this before triaging issues — but after the availability filter)
+
+Cheap things first: a repo with zero currently-open, unassigned contribution-labelled issues cannot produce a contribution today whatever its gate numbers say, and checking that costs one REST call per label. Screen the batch on availability, then gate only the survivors (SKILL.md Phase 2 has the query). Gating first and discovering an empty issue pool afterwards wastes the whole pass.
 
 Everything above can look healthy on a repo where outside PRs never actually land. A project can push daily, merge hundreds of PRs a quarter, and still merge almost nothing from anyone outside the core team. Activity and openness are different questions — measure the second one directly instead of inferring it from the first.
 

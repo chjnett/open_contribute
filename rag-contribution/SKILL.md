@@ -1,7 +1,7 @@
 ---
 name: rag-contribution
 metadata:
-  version: "1.3.0"
+  version: "1.4.0"
 description: Guides a developer through contributing to a Retrieval‑Augmented Generation (RAG) open‑source project (e.g., LangChain, LlamaIndex). It evaluates candidate repos, narrows down a good‑first issue, and walks through a bug‑fix or documentation contribution.
 ---
 

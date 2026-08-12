@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -62,7 +62,20 @@ Score candidates against the criteria in `references/repo-evaluation-criteria.md
 | Contributor base | Many outside orgs/individuals in recent PR authors | Nearly all commits from one company's employees |
 | Feature status | Actively adding features | README says "in maintenance mode" / "feature frozen" |
 
-**Before moving on to Phase 3, run the PR merge reality check** (`references/repo-evaluation-criteria.md` §3): the share of open PRs sitting 90+ days, and the external share of recently merged PRs. Everything in the table above measures whether a project is *active*; these two measure whether an outsider's PR actually lands, which is a different question — and it's the one that decides whether Phase 3 is worth doing at all. A repo can push daily and merge hundreds of PRs a quarter while merging nearly nothing from outside the core team.
+**Filter on availability before you spend anything on the gate.** A repo with zero currently-open, unassigned contribution-labelled issues cannot produce a contribution today no matter how good its gate numbers are. Availability is one cheap REST call per label; the gate is several calls plus a search query that trips secondary rate limits. Check the cheap thing first and gate only the survivors.
+
+```bash
+curl -s "https://api.github.com/repos/{owner}/{repo}/issues?state=open&labels=good%20first%20issue&per_page=100" \
+  | jq '[.[] | select(.pull_request == null) | select(.assignee == null)] | length'
+```
+
+Repeat for `help wanted` and any project-specific label (`Contributions wanted!`, `by-<org>`). Run it across a batch of candidate repos and keep the ones with a non-zero count.
+
+This ordering is the difference between two runs of this skill on the same day. Gating five AI/RAG repos first put `deepset-ai/haystack` and `run-llama/llama_index` through as clean passes — and then Phase 3 found nothing available in either, so the whole pass was wasted. Reversing the order on infra repos screened fourteen candidates in one cheap sweep, left ten with real availability, and only then gated those; that run produced an actual PR.
+
+Availability is about **where to spend effort now, not a permanent verdict.** A healthy repo with an empty label means "come back later" (see the checklist's Step 8 on empty vs. rotten labels) — say so rather than dropping it silently.
+
+**Then, on the repos that survived, run the PR merge reality check** (`references/repo-evaluation-criteria.md` §3): the share of open PRs sitting 90+ days, and the external share of recently merged PRs. Everything in the table above measures whether a project is *active*; these two measure whether an outsider's PR actually lands, which is a different question — and it's the one that decides whether Phase 3 is worth doing at all. A repo can push daily and merge hundreds of PRs a quarter while merging nearly nothing from outside the core team.
 
 If both numbers land in the warning column, **show the user the actual figures and ask whether to continue with this repo or look at alternatives**. It's their call — don't auto-reject the repo, and don't proceed as if the numbers were fine. Skipping this check is how a repo passes Phase 2 on healthy-looking headline stats and only reveals itself after a full Phase 3 pass has already been spent on it.
 

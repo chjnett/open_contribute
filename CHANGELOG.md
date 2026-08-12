@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-08-13
+
+### Changed
+- **Availability is now filtered before the merge gate runs** (Phase 2). A repo with zero
+  currently-open, unassigned contribution-labelled issues cannot produce a contribution
+  today whatever its gate numbers say, and checking that costs one REST call per label —
+  while the gate costs several calls plus a search query that trips secondary rate limits.
+
+  This decided two runs on the same day. Gating five AI/RAG repos first passed
+  `deepset-ai/haystack` and `run-llama/llama_index` cleanly, and Phase 3 then found nothing
+  available in either — the whole pass was wasted. Reversing the order screened fourteen
+  infra candidates in one cheap sweep, left ten with real availability, and gated only
+  those; that run produced an actual PR.
+
+  Availability decides where to spend effort now, not whether a repo is any good. A healthy
+  repo with an empty label means "come back later" (checklist Step 8), and the skill should
+  say so rather than dropping it silently.
+
 ## [1.5.0] - 2026-08-13
 
 Lessons from actually submitting a PR — grafana/grafana#130614.

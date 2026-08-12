@@ -4,7 +4,9 @@ Read this before scoring a RAG project in Phase 2. It layers RAG-specific signal
 top of the general criteria — issue volume, recent activity, and the PR merge reality
 gate below all still apply exactly as they do for any other repo.
 
-## 1. PR merge reality (run this before triaging issues)
+## 1. PR merge reality (run this before triaging issues — but after the availability filter)
+
+Cheap things first: a repo with zero currently-open, unassigned contribution-labelled issues cannot produce a contribution today whatever its gate numbers say, and checking that costs one REST call per label. Screen the batch on availability, then gate only the survivors. This bites hardest in RAG — `deepset-ai/haystack` and `run-llama/llama_index` both passed the gate cleanly and then turned out to have nothing available at all, because their labels are empty precisely by being worked promptly.
 
 RAG repos are among the worst offenders for this pattern: enormous star counts, daily
 commits from a funded core team, a `good first issue` label full of two-year-old
