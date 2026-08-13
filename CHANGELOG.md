@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2026-08-13
+
+### Added
+- **Verify any second-hand account of your PR before acting on it** (PR checklist §6). A
+  confident summary — from the user, a teammate, or another tool — is a claim about state,
+  not the state. An analysis of `grafana/grafana#130614` asserted that a maintainer had
+  moved it onto a squad board, that 28 workflows awaited approval, and that the fix was to
+  comment asking maintainers to approve them. The timeline showed every actor was the
+  author or a bot, `action_required` runs were zero, and all reported checks were passing.
+  Acting on it would have `@`-mentioned two maintainers within a day of opening to ask
+  about something that wasn't blocked — three anti-patterns at once, spending the one
+  nudge on a wrong diagnosis.
+- **Audit against the project's own guide before calling it done** (PR checklist §7, and
+  Phase 4). `CONTRIBUTING.md` is often a stub: Directus's is three lines pointing at a
+  docs site where everything binding actually lives — the CLA mechanism, the mandatory
+  changeset, the past-tense rule. Follow the pointer, then walk the requirements against
+  what you submitted and report the result rather than asserting compliance. Name
+  deviations even when CI is green: this PR hand-wrote the changeset instead of running
+  `pnpm changeset`, same output but a different procedure.
+- **"Just run the one test file" is not a way around the install** (PR checklist §1).
+  `yarn test path/to/one.test.ts` still needs `node_modules`, and a yarn/pnpm workspace
+  has no partial install. It sounds like a lightweight escape hatch and isn't one.
+
 ## [1.8.0] - 2026-08-13
 
 Lessons from a second real submission — directus/directus#28092, found and fixed by the

@@ -15,6 +15,8 @@ Before running `gh pr create`, the agent **must** enforce this checklist. A PR s
 
 **When you genuinely cannot run them**, say so instead of implying you did. Very large repos have real setup costs — a Grafana `yarn install` needs several GB, which is not always available. Check `df -h` before starting rather than discovering it halfway through, and never fill the user's disk to satisfy a checklist item.
 
+**"Just run the one test file" is not a way around the install.** `yarn test path/to/one.test.ts` still needs `node_modules`, and a yarn/pnpm workspace has no partial install that covers a single file. It sounds like a lightweight escape hatch and isn't one — if the install won't fit, neither will the single test.
+
 If you skip local tests, the PR description must say which files were not executed, why, and which specific parts the reviewer should scrutinise. Maintainers accept "I couldn't run the suite, here's what to check" far better than a silent gamble that CI catches it.
 
 ## 1b. Existing tests may encode the bug
@@ -128,3 +130,26 @@ gh api "repos/{owner}/{repo}/pulls/{n}/files" --jq '.[].filename'
 - Re-read the actual check list with `gh pr checks <n>` before telling the user where things stand.
 - **A bot workflow that "succeeded" may have done nothing.** Directus's `cla-comment.yml` finished green and posted no comment, because its artifact-download step is `continue-on-error` and silently no-opped. Telling the user "wait for the bot" would have left them waiting forever. When an expected comment doesn't appear, read the workflow file and find out what it actually requires — don't infer from the check's colour.
 - A failing check is worth reading down to the step name. `Check / fail` on Directus meant one step called `Preserve CLA result` running `exit 1` — nothing to do with the code.
+
+**Verify any second-hand account of your PR before acting on it.** A confident summary — from the user, a teammate, or another tool — is a claim about state, not the state. Check it against the timeline and the check list yourself, especially when the suggested action is a nudge, because a nudge spent on a wrong diagnosis is the one nudge you had.
+
+A worked example on `grafana/grafana#130614`. The account said a maintainer had moved the PR onto a squad board, that 28 workflows were awaiting approval, and that the right move was to comment asking maintainers to approve them. All three were wrong:
+
+| Claim | What the API said |
+| --- | --- |
+| A maintainer moved it to a board | Every timeline actor was the author or `github-actions[bot]` |
+| 28 workflows awaiting approval | Zero runs in `action_required`; all reported checks passing |
+| Ask maintainers to approve the workflows | Nothing was awaiting approval to ask about |
+
+```bash
+gh api "repos/{owner}/{repo}/issues/{n}/timeline?per_page=100" \
+  --jq '.[]|select(.event|test("added_to_project|moved_columns_in_project|review_requested"))|"\(.event) by \(.actor.login)"'
+gh api "repos/{owner}/{repo}/actions/runs?event=pull_request" --jq '[.workflow_runs[]|select(.status=="action_required")]|length'
+```
+
+Had it been acted on, it would have `@`-mentioned two maintainers within a day of opening, to ask for something that wasn't blocked — three anti-patterns from §6 of the message templates at once.
+
+## 7. Audit against the project's own guide before calling it done
+**`CONTRIBUTING.md` is often a stub.** Directus's is three lines pointing at `directus.com/docs/community/contribution/pull-requests`, and everything binding — the CLA mechanism, the mandatory changeset, the past-tense description rule — lives on that page, not in the repo. Follow the pointer; a repo-only reading misses the authoritative source.
+
+When the PR is up, walk the guide's requirements against what you actually submitted, one line at a time, and report the result rather than asserting compliance. Name any deviation even when CI is green: this PR hand-wrote the changeset instead of running `pnpm changeset` as the guide prescribes, because the repo was never cloned. Same output, same passing check, different procedure — and worth one sentence rather than a silent pass.
