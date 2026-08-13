@@ -69,9 +69,18 @@ gh auth login --scopes workflow
 
 ## Install
 
-### Easiest — paste this prompt to your coding agent
+### Claude Code — install as a plugin
 
-Swap the folder name for whichever variant you want.
+Two commands, all three skills, no cloning:
+
+```
+/plugin marketplace add chjnett/open_contribute
+/plugin install first-contribution@open-contribute
+```
+
+### Or paste this prompt to your coding agent
+
+For agents without plugin support. Swap the folder name for whichever variant you want.
 
 ```text
 Install the first-contribution agent skill for me, and nothing else.

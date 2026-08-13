@@ -69,9 +69,18 @@ gh auth login --scopes workflow
 
 ## 설치
 
-### 가장 쉬운 방법 — 코딩 에이전트에 이 프롬프트를 붙여넣기
+### Claude Code — 플러그인으로 설치
 
-원하는 변형으로 폴더명만 바꾸면 됩니다.
+명령어 두 줄이면 스킬 3개가 전부 설치됩니다. 클론 불필요:
+
+```
+/plugin marketplace add chjnett/open_contribute
+/plugin install first-contribution@open-contribute
+```
+
+### 또는 코딩 에이전트에 이 프롬프트를 붙여넣기
+
+플러그인을 지원하지 않는 에이전트용입니다. 원하는 변형으로 폴더명만 바꾸면 됩니다.
 
 ```text
 first-contribution-ko 에이전트 스킬만 설치해줘, 다른 건 건드리지 마.
