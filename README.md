@@ -114,12 +114,27 @@ The skill triggers on intent — no commands:
 
 ## Field notes
 
-Every rule in the checklist was added after it cost a real run something. A few of the findings:
+Every rule in the checklist was added after it cost a real run something.
+
+### What it has produced
+
+Two pull requests, each found and root-caused by the skill from a cold start:
+
+| PR | Bug | State |
+| :--- | :--- | :--- |
+| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | Copied short URLs carried `orgId=org-5` because the resource namespace was used as the org ID | All checks green, in review |
+| [directus/directus#28092](https://github.com/directus/directus/pull/28092) | GraphQL fragments on an M2A union resolved every field to `null` | All checks green, 100% patch coverage, in review |
+
+The second run is the better illustration of the funnel: 30 backend repos screened for availability → 13 with open contribution issues → 11 through the merge gate → **229 candidate issues checked for linked PRs** → 26 still claimable → one with a defect verified live in `main`.
+
+### What each rule cost
 
 - **`chroma-core/chroma`** — 29k stars, pushed daily, 11 open `good first issue`s. Also 275 of 452 open PRs sitting 90+ days, 8% of merges from outside the top-5 authors, and 17 of 17 PRs against those labelled issues failed to merge. The gate exists because of this repo.
 - **`deepset-ai/haystack`** — passes the gate comfortably, and its contribution labels are *empty*: 199 such issues total, zero open. An empty label on a healthy repo means "come back later," which is the opposite diagnosis from a rotten one.
 - **`argoproj/argo-cd#29051`** — 8 days old, unassigned, zero linked PRs, `severity:critical`. It passed every social check and had already been fixed by `v3.3.14`. That is why the checklist now verifies the defect against current code.
-- **`grafana/grafana#130567`** — found by this skill, root-caused to a namespace being used as an org ID, and submitted as [#130614](https://github.com/grafana/grafana/pull/130614). Its existing tests had asserted the buggy output, which is how the bug shipped.
+- **Both PRs' existing tests asserted the buggy output.** Grafana's expected `orgId=org-5`; Directus's would have broken on the obvious fix because its mock schemas define `relations` and no `collections`. Read the fixtures before choosing how to write a fix.
+- **CLAs are not all the same.** Grafana uses an external signing service; Directus asks you to add your username to `contributors.yml` *inside the PR* — a one-line diff that is nonetheless the act of signing. The skill will never do that for you.
+- **A second-hand summary of your own PR is a claim, not the state.** One arrived asserting 28 workflows awaited approval on the Grafana PR; the API showed zero. Acting on it would have burned the single follow-up nudge on a non-problem.
 
 ## Reproducing the charts
 
