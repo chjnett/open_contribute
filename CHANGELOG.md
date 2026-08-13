@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-08-13
+
+Lessons from a second real submission — directus/directus#28092, found and fixed by the
+skill end to end.
+
+### Added
+- **CLAs come in two shapes** (PR checklist §4). Grafana uses an external signing service,
+  which is obviously not something an agent can do. Directus asks contributors to add
+  their GitHub username to `contributors.yml` **inside the PR** — mechanically a one-line
+  diff, and making it *is* the act of signing. The section now names both shapes, says to
+  read the CLA workflow rather than guess, and warns that a bare "yes" is agreement to the
+  task rather than informed consent to a legal document.
+- **Let the existing fixtures decide how you write the fix** (PR checklist §1c). The
+  obvious guard for the Directus bug was `typeCondition in schema.collections`, but the
+  mock schemas define only `relations` — it would have thrown on `undefined`, and
+  defending it with `?? {}` would have flipped every existing M2A test to the wrong
+  branch. The same relation already carried `meta.one_allowed_collections`, which the
+  fixtures do populate. Trace the approach through each existing case before committing
+  to it.
+- **Release tooling a PR must carry** (PR checklist §5b). Directus requires a
+  `.changeset/*.md` naming the package and describing the fix in past tense. The reliable
+  way to learn every convention at once is to read the *file list* of a recently merged PR
+  of the same kind.
+- **A green bot workflow may have done nothing** (PR checklist §6). Directus's
+  `cla-comment.yml` finished successfully and posted no comment, because its
+  artifact-download step is `continue-on-error`. "Wait for the bot" would have meant
+  waiting forever. Also: read a failing check down to the step name — `Check / fail` was
+  one step called `Preserve CLA result` running `exit 1`, unrelated to the code.
+
 ## [1.7.1] - 2026-08-13
 
 ### Fixed

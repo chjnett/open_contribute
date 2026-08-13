@@ -32,6 +32,15 @@ expect(result).toBe('...?orgId=org-5');   // 버그가 기대값으로
 - **그 기대값을 수정의 일부로 함께 고치고**, PR에 그렇게 적으세요 — 버그가 리뷰를 어떻게 빠져나갔는지 설명해줍니다.
 - **변경한 함수를 또 누가 호출하는지 확인하세요.** 다른 진입점으로 같은 코드 경로를 지나던 무관한 테스트 2건이 깨질 뻔했고, 공용 `beforeEach`에 기본값을 넣어야 했습니다. 변경이 고립돼 있다고 단정하기 전에 테스트 파일 전체에서 함수명을 grep 하세요.
 
+## 1c. 수정 방식은 기존 픽스처가 결정하게 하세요
+한 버그에 그럴듯한 수정이 여러 개일 때, 대개 테스트 픽스처가 대부분을 걸러냅니다. 고르기 전에 픽스처부터 읽으세요.
+
+Directus의 M2A 버그에서 가장 자연스러운 가드는 "이 타입 조건이 실제 컬렉션인가?", 즉 `typeCondition in schema.collections`였습니다. 그런데 `parse-query.test.ts`의 목 스키마는 `{ relations: [...] }`뿐이고 `collections` 키가 아예 없습니다 — 그대로 갔으면 `undefined`에서 던졌을 것이고, `?? {}`로 방어했어도 기존 M2A 테스트가 전부 반대 분기를 타서 깨졌을 겁니다.
+
+같은 relation 객체가 이미 `meta.one_allowed_collections`를 들고 있었고, 픽스처가 그건 채워두고 있었습니다(`['child']`, `['ComponentText']`). 그쪽을 기준으로 삼으니 버그도 고쳐지고 기존 케이스도 전부 통과했습니다.
+
+정리하면: 접근을 확정하기 전에 기존 테스트 케이스마다 손으로 로직을 따라가 보고, 의존하려는 데이터가 픽스처에 실제로 있는지 확인하세요. 몇 분이면 되고, CI 초록불과 리뷰어가 실패를 지켜보는 것의 차이입니다.
+
 ## 2. 린트와 포매팅
 - 많은 레포가 CI에서 포매팅 검사를 강제합니다(`black`, `ruff`, `prettier`, `eslint` 등).
 - `CONTRIBUTING.md`나 `package.json`/`Makefile`에서 포매팅 명령을 찾아 실행하세요(`make lint`, `npm run format` 등).
@@ -56,7 +65,18 @@ gh api "repos/{owner}/{repo}/commits?sha={branch}" --jq '.[].commit.verification
 
 사용자에게 서명 키가 없다면 대신 만들어주지 마세요 — 이 레포는 서명된 커밋을 요구한다고 알리고 직접 설정하게 하거나, GitHub이 대신 서명해주는 §4b의 API 방식을 쓰세요.
 
-**CLA** — 법적 계약이고 보통 cla-assistant 같은 봇이 강제합니다. **사용자를 대신해 CLA에 서명하거나 동의하지 마세요.** 링크를 안내하고, 오직 본인만 서명할 수 있다고 분명히 말한 뒤 나머지 작업을 계속하세요. Grafana의 CLA는 머지만 막고 다른 건 막지 않으므로, 서명 대기 중에도 PR을 열고 리뷰받을 수 있습니다.
+**CLA** — 법적 계약입니다. **사용자를 대신해 CLA에 서명하거나 동의하지 마세요.** 그리고 짧은 "ㅇㅇ"이나 "진행해"는 *작업*에 대한 동의이지 법적 문서에 대한 숙지된 동의가 아닙니다. 약관 본문을 안내하고 본인만 수락할 수 있다고 분명히 말한 뒤 나머지는 계속 진행하세요 — 대기 중인 CLA는 보통 머지만 막으므로 PR을 열고 리뷰받는 데는 지장이 없습니다.
+
+CLA는 최소 두 가지 형태가 있고, 두 번째가 무심코 넘어가기 쉽습니다:
+
+- **외부 서명 서비스** (cla-assistant 등). Grafana가 이 방식입니다 — 봇이 링크를 코멘트로 달고, 사용자가 앱 권한을 승인하고 거기서 서명합니다. 대신 해줄 수 없는 게 명백합니다.
+- **PR 안의 파일 수정.** Directus는 PR에서 `contributors.yml`에 본인 GitHub 사용자명을 추가하게 합니다. 기계적으로는 한 줄 diff라 얼마든지 할 수 있지만, **그 수정이 곧 서명 행위**입니다. 정체를 알아보고 사용자에게 넘기세요.
+
+어느 형태인지는 추측하지 말고 워크플로를 읽어서 확인하세요:
+
+```bash
+gh api "repos/{owner}/{repo}/contents/.github/workflows" --jq '.[].name' | grep -i cla
+```
 
 ## 4b. 클론 없이 커밋하기 (그리고 Verified 받기)
 아주 큰 레포에 작은 변경을 넣을 때, 클론 비용이 변경 자체보다 클 수 있습니다. API로 커밋할 수 있는데, 두 경로가 **동등하지 않습니다**:
@@ -79,7 +99,32 @@ gh api graphql --input payload.json   # {"query": "mutation($input: CreateCommit
 - GitHub가 이슈를 자동 연결하도록 `Fixes #이슈번호` 또는 `Closes #이슈번호`를 정확히 포함하세요.
 - 실제로 설계 선택지가 있다면 리뷰어에게 대안을 제시하세요. "X에서 파생하는 대신 Y에서 읽는 쪽을 원하시면 말씀해 주세요, 그렇게 고치겠습니다" 같은 한 줄은 비용이 없고, 독단적이지 않고 협업적으로 읽힙니다.
 
+## 5b. 이런 유형의 PR이 함께 담아야 하는 릴리스 도구 파일
+코드가 맞아도 곁다리 파일 하나가 없어서 CI가 깨질 수 있습니다. 커밋 전에 릴리스 도구를 확인하세요:
+
+```bash
+gh api "repos/{owner}/{repo}/contents/.changeset" --jq 'length'   # changesets 사용?
+```
+
+[changesets](https://github.com/changesets/changesets)를 쓰는 레포라면 버그 수정에도 `.changeset/<이름>.md`가 필요합니다. 영향받는 패키지와 과거형 설명을 적습니다:
+
+```markdown
+---
+'@directus/api': patch
+---
+
+Fixed GraphQL fragments declared on an M2A union type resolving their fields as null
+```
+
+관례를 한 번에 파악하는 가장 확실한 방법은 **같은 유형으로 최근 머지된 PR의 파일 목록**을 읽는 것입니다 — changeset, 테스트 위치, 함께 나가는 문서·스펙 수정이 전부 보입니다:
+
+```bash
+gh api "repos/{owner}/{repo}/pulls/{n}/files" --jq '.[].filename'
+```
+
 ## 6. 제출 후 — 성공을 보고하기 전에 체크 상태를 읽을 것
 - 외부 PR은 대부분의 CI가 **메인테이너 승인 대기**로 잡힙니다("N workflows awaiting approval"). 이건 정상 절차지 실패가 아니므로 그렇게 설명하세요.
 - 사용자가 조치해야 하는 것(서명 안 된 CLA)과 그냥 기다리는 것(리뷰어 배정, `policy-bot 0/1 rules approved`)을 구분해서 알려주세요.
 - 상황을 보고하기 전에 `gh pr checks <n>`으로 실제 체크 목록을 다시 읽으세요.
+- **"성공"한 봇 워크플로가 아무 일도 안 했을 수 있습니다.** Directus의 `cla-comment.yml`은 초록불로 끝났는데 코멘트는 하나도 안 달렸습니다 — 아티팩트 다운로드 단계가 `continue-on-error`라 조용히 no-op 했기 때문입니다. "봇 기다리세요"라고 했으면 사용자는 영원히 기다렸을 겁니다. 기대한 코멘트가 안 보이면 워크플로 파일을 읽고 실제로 무엇이 필요한지 확인하세요 — 체크의 색깔로 추측하지 마세요.
+- 실패한 체크는 단계 이름까지 읽을 가치가 있습니다. Directus의 `Check / fail`은 `Preserve CLA result`라는 단계가 `exit 1` 한 것이었고, 코드와는 무관했습니다.
