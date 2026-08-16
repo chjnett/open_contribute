@@ -56,6 +56,11 @@ All notable changes to this project will be documented in this file.
 - **Use module-level functions in multiprocessing/pool tests** (PR checklist §1). A
   local closure can't be pickled under the spawn start method, so the test hangs instead
   of failing cleanly — write the task function at module level (billiard #427).
+- **Re-check current `main` when a PR goes conflicting / before re-pushing** (triage
+  checklist Step 7). The issue can be resolved upstream in the *opposite* direction while
+  your PR is in flight — urfave/cli #2404 was resolved by keeping the primary-name error
+  and fixing the test expectation, the opposite of my alias-as-typed PR, which was then
+  superseded. Close gracefully instead of forcing a contradicting fix.
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).

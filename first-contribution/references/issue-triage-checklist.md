@@ -97,6 +97,14 @@ When you find the defect is already gone, that's still worth something: post a s
 
 There's a third case: the "defect" was never a defect — the doc/code discrepancy is a *deliberate* recent change. When a report says "docs say X but the code does Y", check the changelog before "fixing" the doc. mycli's 2.0.0 notes deliberately switched to advertising forward-slash commands, with backslash kept only for backward compatibility; "fixing" the doc back to backslash undid that migration, and the reporter's failure just meant they were on an old version.
 
+And there's the mid-PR case: while your PR is in flight, the issue can be resolved
+upstream in the *opposite* direction from yours. urfave/cli's #2404 was fixed on `main`
+by correcting the test expectation to the primary flag name (`option t`) rather than
+changing the code to report the alias (`option ai`) — the exact opposite of my PR. When
+a merge conflict appears or before pushing another iteration, re-check current `main`;
+if the maintainers already decided the open question the other way, close your PR
+gracefully instead of forcing a contradicting fix.
+
 ## Step 8 — When nothing survives, diagnose *why* before pivoting
 Two very different situations produce "no issue to recommend," and they call for opposite advice. Check which one you're in by counting the contribution label's issues in **both** states (`state=open` and `state=all`).
 
