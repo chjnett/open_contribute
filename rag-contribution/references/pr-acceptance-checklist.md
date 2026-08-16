@@ -74,6 +74,15 @@ checked against `main` is what turns a maintainer's first review into an approve
 most common way a small PR dies is a first-review "did you check X?" or a CI failure a
 grep would have caught.
 
+## 1f. Cut the diff to the smallest change that fixes the issue
+
+A reviewer has to verify every line they didn't write, so merge probability tracks the
+diff size, not the effort that went into it: `size/small` PRs get reviewed in minutes,
+`size/large` ones sit for weeks. Before submitting, re-read the diff and delete anything
+not strictly required by the fix — unrelated refactors, drive-by formatting, "while I'm
+here" improvements. Move genuinely separate changes into their own PR. Every line you
+can cut is a line the reviewer doesn't have to verify.
+
 ## 2. Linting and Formatting
 - Many repos enforce formatting checks (e.g., `black`, `ruff`, `prettier`, `eslint`) in their CI pipelines.
 - Find the formatting command in `CONTRIBUTING.md` or `package.json`/`Makefile` and run it (e.g., `make lint` or `npm run format`).

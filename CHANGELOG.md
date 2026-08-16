@@ -33,6 +33,9 @@ All notable changes to this project will be documented in this file.
   real, and every caller of the changed function still behaves — this is what turns a
   maintainer's first review into an approve, and it lets you say "couldn't run, but I
   verified X/Y/Z" instead of a bare "couldn't run".
+- **Cut the diff to the smallest change that fixes the issue** (PR checklist §1f).
+  Merge probability tracks diff size, not effort — `size/small` gets reviewed in
+  minutes, `size/large` sits for weeks — so strip everything not strictly required.
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).
