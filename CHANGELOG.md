@@ -36,6 +36,11 @@ All notable changes to this project will be documented in this file.
 - **Cut the diff to the smallest change that fixes the issue** (PR checklist §1f).
   Merge probability tracks diff size, not effort — `size/small` gets reviewed in
   minutes, `size/large` sits for weeks — so strip everything not strictly required.
+- **Detect issues taken with no visible signal** (triage checklist Step 3). A closed,
+  unmerged PR whose maintainer reply says "patches in internal review" (alembic), or a
+  pile of closed PRs plus an "Upstream" label (jsonschema), means the work is happening
+  elsewhere — check closed PRs and labels before assuming an unassigned, unlinked issue
+  is free.
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).

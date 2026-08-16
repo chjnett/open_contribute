@@ -42,6 +42,14 @@ Near the bottom of the issue sidebar, GitHub shows "Development" with any linked
 
 Count them rather than treating this as a yes/no. One linked PR means the issue is taken. Five or seven failed attempts on the same issue (`chroma-core/chroma#2334` had seven, none merged) means something structural is wrong — the fix is harder than the label suggests, or the maintainers aren't merging this area at all. Treat a pile-up as evidence about the *repo*, not just the issue.
 
+An issue can also be taken with no linked PR in the Development section at all. When
+closed, unmerged PRs reference the issue, read the maintainer's reply on them — on
+alembic, the maintainer closed two PRs for still-open batch-migration issues with
+"these issues have patches in internal review already"; on jsonschema, a pile of closed
+PRs plus an "Upstream" label meant the fix belongs in the `isoduration` dependency, not
+jsonschema. Either is a hard "move on" signal: the work is already happening elsewhere.
+Check closed PRs and labels before assuming an unassigned, unlinked issue is free.
+
 ## Step 4 — Check Assignees
 "No one assigned" is necessary but not sufficient (see Steps 3 and 5) — plenty of people work on issues without formally requesting assignment. But if someone *is* assigned, skip it.
 
