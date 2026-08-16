@@ -68,6 +68,7 @@ Directus의 M2A 버그에서 가장 자연스러운 가드는 "이 타입 조건
 - `CONTRIBUTING.md`나 `package.json`/`Makefile`에서 포매팅 명령을 찾아 실행하세요(`make lint`, `npm run format` 등).
 - 사소한 공백이나 스타일 오류가 남은 코드를 제출하지 마세요.
 - 실제 린트 설정을 추측 대신 그대로 돌리세요: `pre-commit run`이 있으면 그걸, 아니면 설정 파일의 정확한 린터 명령을 실행하세요. 커스텀 isort 프로파일은 함수 내 로컬 import 두 줄의 순서까지 바꿉니다 — psycopg는 `length_sort`를 써서 `from psycopg.adapt import X`가 `from psycopg._copy_base import Y`보다 앞에 옵니다. CI에서 발견하지 말고 푸시 전에 로컬에서 돌리세요.
+- 타입 체커가 `tests/`도 검사하는 레포(psycopg의 mypy 설정)에서는 **내가 추가한 테스트**도 그 기준을 만족해야 합니다 — 런타임에는 테스트가 통과해도 CI가 잘못된 인자 타입을 잡아냅니다(psycopg의 `set_loader_types([25], 0)`은 동작했지만 mypy가 `pq.Format` 파라미터에 int를 거부). 푸시 전에 새 파일에 대해 타입 체커를 로컬에서 돌리고, raw 값 대신 이름 있는 enum을 쓰세요.
 
 ## 2b. 편집 전에 자동 생성 파일인지 확인하세요
 

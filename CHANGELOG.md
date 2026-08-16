@@ -56,6 +56,10 @@ All notable changes to this project will be documented in this file.
 - **Use module-level functions in multiprocessing/pool tests** (PR checklist §1). A
   local closure can't be pickled under the spawn start method, so the test hangs instead
   of failing cleanly — write the task function at module level (billiard #427).
+- **Type checkers inspect your added tests too** (PR checklist §2). A test can pass at
+  runtime yet fail the repo's mypy run (psycopg's `set_loader_types([25], 0)` rejected
+  the bare int for a `pq.Format` parameter) — run the type checker on your new files
+  locally and use named enums, not raw values.
 - **Re-check current `main` when a PR goes conflicting / before re-pushing** (triage
   checklist Step 7). The issue can be resolved upstream in the *opposite* direction while
   your PR is in flight — urfave/cli #2404 was resolved by keeping the primary-name error

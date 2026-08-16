@@ -99,6 +99,11 @@ can cut is a line the reviewer doesn't have to verify.
   reorder even two function-local imports — psycopg uses `length_sort`, so
   `from psycopg.adapt import X` sorts before `from psycopg._copy_base import Y`. Run it
   locally before pushing instead of discovering it in CI.
+- In repos whose type checker also checks `tests/` (psycopg's mypy config does), your
+  *added tests* must satisfy it too — CI will catch a wrong argument type even when the
+  test passes at runtime (psycopg's `set_loader_types([25], 0)` ran fine, but mypy
+  rejected the bare int for a `pq.Format` parameter). Run the type checker on your new
+  files locally before pushing, and use the named enum rather than the raw value.
 
 ## 2b. Check for auto-generated files before editing
 
