@@ -86,6 +86,7 @@ Go look at the actual code or artifact:
 
 - Fetch the relevant file at the **current default branch**, not at the version in the report.
 - If the report names a version, also check the **release branch and any later tags** on that line. A bug real in `v3.3.13` is not actionable if `v3.3.14` already shipped the fix.
+- Check the file's recent commit history too (`gh api "repos/{owner}/{repo}/commits?path={file}"`). A fix can land on `main` before the issue is even filed — kombu's stale-fd `KeyError` was reported against a released version weeks after commit `4281680e` had already fixed it on `main`.
 - For a behavioural bug, find the code path and confirm the faulty logic is still written that way.
 
 **Use a real parser, not `grep` or a regex, when the artifact is structured.** On `argoproj/argo-cd#29051` a regex scan of the YAML reported the manifest as fine; parsing it with an actual YAML library found the missing volume immediately. A false "looks fine" here sends the user away from a real bug, and a false "looks broken" sends them at a phantom.

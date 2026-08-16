@@ -41,6 +41,14 @@ All notable changes to this project will be documented in this file.
   pile of closed PRs plus an "Upstream" label (jsonschema), means the work is happening
   elsewhere — check closed PRs and labels before assuming an unassigned, unlinked issue
   is free.
+- **Check the file's commit history before reproducing** (triage checklist Step 7). A
+  fix can land on `main` before the issue is even filed — kombu's stale-fd `KeyError`
+  was reported against a released version weeks after `4281680e` had already fixed it
+  on `main`.
+- **Detect repos that silently block new-contributor PRs** (SKILL Phase 5). Some
+  high-profile repos reject `gh pr create` with a permissions error (and REST 404) for
+  brand-new accounts — if the issue reporter was also "blocked", don't work around it,
+  pick a different repo.
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).
