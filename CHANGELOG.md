@@ -49,6 +49,10 @@ All notable changes to this project will be documented in this file.
   high-profile repos reject `gh pr create` with a permissions error (and REST 404) for
   brand-new accounts — if the issue reporter was also "blocked", don't work around it,
   pick a different repo.
+- **Check the changelog before "fixing" a doc/code discrepancy** (triage checklist
+  Step 7). A doc that looks wrong can be a deliberate recent migration — mycli's 2.0.0
+  notes deliberately switched to advertising forward-slash commands, so "fixing" the doc
+  back undid that change and the reporter's failure just meant an old version.
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).

@@ -95,6 +95,8 @@ That issue is the cautionary case for this whole step: created 8 days earlier, n
 
 When you find the defect is already gone, that's still worth something: post a short comment saying which release fixed it so a maintainer can close the issue. Say plainly that it's not a code contribution, and move to the next candidate.
 
+There's a third case: the "defect" was never a defect — the doc/code discrepancy is a *deliberate* recent change. When a report says "docs say X but the code does Y", check the changelog before "fixing" the doc. mycli's 2.0.0 notes deliberately switched to advertising forward-slash commands, with backslash kept only for backward compatibility; "fixing" the doc back to backslash undid that migration, and the reporter's failure just meant they were on an old version.
+
 ## Step 8 — When nothing survives, diagnose *why* before pivoting
 Two very different situations produce "no issue to recommend," and they call for opposite advice. Check which one you're in by counting the contribution label's issues in **both** states (`state=open` and `state=all`).
 
