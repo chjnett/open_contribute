@@ -159,7 +159,7 @@ python3 scripts/generate_charts.py
 | :--- | :--- |
 | **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | Your `gh` token can't push to repos with GitHub Actions:<br>`gh auth refresh --scopes workflow` |
 | **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | An old token is stuck in your environment:<br>`unset GITHUB_TOKEN` (Mac/Linux) or `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
-| **"Host key verification failed"** during clone | SSH keys aren't set up; switch `gh` to HTTPS:<br>`gh config set git_protocol https` |
+| **"Host key verification failed"** during clone | SSH keys aren't set up; switch `gh` to HTTPS:<br>`gh config set git_protocol https`. If that can't write its config, the fork is still created — clone it over HTTPS explicitly:<br>`git clone https://github.com/{user}/{repo}.git` then `git remote add upstream https://github.com/{owner}/{repo}.git` |
 | **"Commits must have verified signatures"** | The repo requires signed commits. `git commit -s` is DCO sign-off and does **not** satisfy this — you need a signing key, or commit via GraphQL `createCommitOnBranch`. |
 | **CLA check stays pending** | Only you can sign a CLA. Follow the bot's link from the PR itself; if the page renders blank, a content blocker is usually eating the agreement text. |
 

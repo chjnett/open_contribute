@@ -2,6 +2,27 @@
 
 Run through this for **every** issue before recommending it. Skipping this is the most common way this skill fails the user — a confidently-recommended dead issue is worse than no recommendation at all.
 
+## Step 0 — Pre-filter with search operators before opening a single issue
+
+Don't triage one issue at a time when one search query can drop the obviously-taken
+ones for a whole repo. The search API supports `no:assignee` and `-linked:pr`
+qualifiers, which answer Steps 3 and 4 (linked PRs, assignees) at search time:
+
+```bash
+gh api "search/issues?q=repo:{owner}/{repo}+type:issue+state:open+no:assignee+-linked:pr+label:bug&sort=created&order=desc"
+```
+
+`-linked:pr` removes every issue that has any linked PR — the "already claimed"
+cases Step 3 would otherwise find one timeline fetch at a time — and `no:assignee`
+removes the Step 4 cases, in a single call. Run it across each label you care about
+(`good first issue`, `help wanted`, `bug`, …) and spend Steps 1-7 only on what
+survives.
+
+Two caveats: `-linked:pr` only sees PRs GitHub has *linked* to the issue (via the
+Development section), not a PR mentioned only in a comment body, so Steps 2 and 5
+still apply to the survivors. And the search API carries a stricter secondary rate
+limit than the REST endpoints, so space the calls (see the SKILL's Phase 2 note).
+
 ## Step 1 — Fetch the actual issue page
 Use `web_fetch` on the issue's URL (`https://github.com/{owner}/{repo}/issues/{n}`), not just the search API result — the API's `comments` count doesn't tell you what the comments actually say, and the body often carries a disqualifier (Step 2) that never shows up in a search listing.
 
@@ -40,6 +61,15 @@ Also watch for **claim-comment pile-up**: several people saying "I'd like to wor
 
 ## Step 6 — Sanity check issue age against the label
 Old good-first-issue labels (1+ years) on popular/high-traffic repos are disproportionately likely to already be claimed, simply because more people have had the chance to find them. Prefer issues created more recently when the label itself is recent, but don't auto-reject old ones — some sit untouched for legitimate reasons (niche area, unclear scope). Just weight recency as a soft signal, and Steps 2-5 as the hard filter, with Step 7 as the final proof.
+
+There is a second age signal on fast-moving repos, and it points the opposite way: an
+issue that has sat *unassigned with no linked PR* for months is often not merely
+low-priority — it's "doesn't reproduce" or "already fixed", which is exactly why
+nobody touched it. In a real run, sqlfluff's months-old open bugs were
+disproportionately unreproducible or already-fixed, while every fresh bug got claimed
+within days. When an old-but-unclaimed issue survives the social checks, run Step 7
+(verify the defect still exists) *before* investing further — and expect to discard
+it.
 
 ## Step 7 — Verify the defect still exists in current code
 Everything above is a *social* signal — assignee, linked PRs, comments, age. None of them prove the bug is still there. A fix can land through an unrelated commit, another issue's PR, or a patch release, and the issue simply never gets closed. Run this check last, on the handful of issues that survived Steps 2-6, because it's the expensive one.

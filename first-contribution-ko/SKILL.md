@@ -1,7 +1,7 @@
 ---
 name: first-contribution-ko
 metadata:
-  version: "1.9.0"
+  version: "1.10.0"
 description: "개발자가 오픈소스에 첫(혹은 다음) 기여를 하도록 처음부터 끝까지 돕습니다 — 초보자 친화적인 레포를 고르고, 진짜로 열려있는 good first issue를 찾아내고(연결된 PR, 담당자, 코멘트를 확인해서 이미 죽은 이슈는 걸러냄), AI 코딩 에디터로 실제 수정 작업을 진행합니다. 사용자가 오픈소스 기여를 시작하고 싶어하거나, 이슈 추천을 요청하거나, 이 레포가 초보자한테 괜찮은지 물어보거나, 깃허브 컨트리뷰션을 쌓고 싶다고 하거나, 어떤 프로젝트에 기여할지 모르겠다고 할 때, 언어나 프레임워크나 관심 분야만 언급해도(러스트 관련된 거 기여하고 싶다는 식으로) 이 스킬을 사용하세요. 사용자와의 대화는 한국어로 진행합니다."
 ---
 
@@ -86,7 +86,9 @@ curl -s "https://api.github.com/repos/{owner}/{repo}/issues?state=open&labels=go
    ```
    https://github.com/{owner}/{repo}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+sort%3Acreated-desc+no%3Aassignee
    ```
-   (`web_fetch`로 가져오거나, 검색 API 쿼리에 `+no:assignee`를 붙이세요)
+   (`web_fetch`로 가져오거나, 검색 API 쿼리에 `+no:assignee+-linked:pr`를 붙이세요 —
+   `-linked:pr`가 타임라인 조회를 한 건씩 하기 전에 "이미 선점된" 경우를 1차로 걸러줍니다.
+   체크리스트 Step 0 참고)
 
 2. 추천하기 전에 모든 후보 이슈에 대해 `references/issue-triage-checklist.md`의 전체 체크리스트를 따르세요. 요약하면: **본문 전체**를 읽어 내부 전용 공지가 있는지 확인, **Development 섹션**에서 연결된 PR 확인, **Assignees** 확인, 최근 코멘트 2~3개를 읽어 이미 해결됐거나 작업 중이라는 신호가 있는지 확인합니다. 실제 이슈 URL을 `web_fetch`로 열어서 확인하세요 — `updated_at` 타임스탬프만 보고 최신성을 판단하지 마세요. 최근 업데이트가 오히려 "방금 종료 처리됐다"는 신호인 경우가 흔합니다(실제로 사용자가 이걸로 두 번 당했습니다 — 가장 최근 코멘트가 "이거 해결된 것 같아요, PR 곧 닫을게요"였습니다).
 
@@ -121,6 +123,8 @@ curl -s "https://api.github.com/repos/{owner}/{repo}/issues?state=open&labels=go
 
 1. **인증 확인:** 사용자에게 `gh auth status`를 실행하게 하세요. 로그인이 안 돼 있거나 스코프가 부족하면 `gh auth login --scopes workflow`를 실행하고 안내를 따르게 하세요(웹 브라우저 옵션이 가장 쉽습니다). 클론 중 SSH 호스트 키 오류가 나면 `gh config set git_protocol https`를 알려주세요.
 2. **포크 & 클론 자동화:** 수동 클론 대신 `gh repo fork {owner}/{repo} --clone`을 실행하게 하세요. 이 한 줄로 포크 생성, 로컬 클론, `origin`/`upstream` 리모트 설정이 한 번에 끝납니다.
+
+   클론 단계가 SSH 호스트 키 오류로 실패하면(그리고 `gh config set git_protocol https`도 설정 파일을 못 쓴다면) 포크는 이미 생성돼 있습니다 — 포크를 HTTPS로 명시적으로 클론해서 복구하세요: `git clone https://github.com/{user}/{repo}.git` 후 `git remote add upstream https://github.com/{owner}/{repo}.git`.
 
    **먼저 `df -h`로 확인하세요.** Grafana 같은 모노레포는 클론과 설치에 수 GB가 필요하고, 사용자의 디스크를 채우는 건 어떤 체크리스트 항목보다 나쁩니다. 공간이나 시간이 안 되고 변경이 작다면 클론을 아예 건너뛸 수 있습니다: `raw.githubusercontent.com`에서 해당 파일만 받아 로컬에서 수정하고 API로 커밋하세요 — 단 REST Contents API가 아니라 GraphQL `createCommitOnBranch`를 쓰세요. 일부 레포가 요구하는 `Verified` 커밋은 후자로만 만들어집니다. `references/pr-acceptance-checklist.md` §4b를 참고하고, 돌리지 못한 테스트는 PR에 분명히 밝히세요.
 3. `CONTRIBUTING.md`와 `README.md`를 먼저 읽으세요 — 프로젝트마다 브랜치 명명 규칙, 커밋 메시지 포맷, 필수 테스트, DCO/CLA 서명 등 관례가 조금씩 다릅니다. **`CONTRIBUTING.md`가 껍데기면 링크를 따라가세요.** Directus의 것은 문서 사이트를 가리키는 3줄이고, 구속력 있는 내용(CLA 방식, 필수 changeset, 과거형 설명 규칙)은 레포가 아니라 그쪽에 있습니다.

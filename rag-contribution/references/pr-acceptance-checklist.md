@@ -43,10 +43,38 @@ The same relation object already carried `meta.one_allowed_collections`, which t
 
 So: before committing to an approach, trace it through each existing test case by hand and confirm the data it depends on is actually present in the fixtures. This costs a few minutes and is the difference between a green CI run and a reviewer watching your PR fail.
 
+## 1d. When a bug is reported against one implementation, check its sibling
+
+Some projects ship two implementations of the same code path — a C extension plus a
+pure-Python fallback, sync and async copies, or several dialects. A "bug" reported
+against one is often really a *divergence*: the sibling already handles the case
+correctly. psycopg's pure-Python `_parse_row_binary` silently truncated a field whose
+declared length exceeded the buffer, while its C `parse_row_binary` already raised
+`DataError("bad copy data: length exceeding data")` for the same input. That turns a
+"is this even a bug?" debate into an unambiguous consistency fix — and the sibling's
+behaviour and error message are your spec. Grep the sibling path and match it rather
+than inventing a new policy.
+
 ## 2. Linting and Formatting
 - Many repos enforce formatting checks (e.g., `black`, `ruff`, `prettier`, `eslint`) in their CI pipelines.
 - Find the formatting command in `CONTRIBUTING.md` or `package.json`/`Makefile` and run it (e.g., `make lint` or `npm run format`).
 - Do not submit code with trivial whitespace or stylistic errors.
+- Run the repo's *actual* lint config rather than guessing: `pre-commit run` if it
+  exists, or the exact linter commands from its config. A custom isort profile can
+  reorder even two function-local imports — psycopg uses `length_sort`, so
+  `from psycopg.adapt import X` sorts before `from psycopg._copy_base import Y`. Run it
+  locally before pushing instead of discovering it in CI.
+
+## 2b. Check for auto-generated files before editing
+
+Some repos keep a generated file next to a hand-written source — e.g. psycopg
+generates `tests/test_copy.py` from `tests/test_copy_async.py` via
+`tools/async_to_sync.py`, with a "DO NOT CHANGE — change the original instead"
+header. Hand-editing the generated file gets silently overwritten or fails a
+sync-check in CI. Read the file header and look for the generator script; edit the
+source and regenerate. Keep the generated output byte-identical to what the repo's
+generator version produces — a newer or older generator can reformat the whole file,
+and committing that churn is a separate nuisance to avoid.
 
 ## 3. Commit Message Style Matching
 - Check the last 10 commits in the repository: `git log --oneline -n 10`, or `gh api "repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc" --jq '[.[]|select(.merged_at!=null)][].title'` when you have no clone.
@@ -130,6 +158,11 @@ gh api "repos/{owner}/{repo}/pulls/{n}/files" --jq '.[].filename'
 - Re-read the actual check list with `gh pr checks <n>` before telling the user where things stand.
 - **A bot workflow that "succeeded" may have done nothing.** Directus's `cla-comment.yml` finished green and posted no comment, because its artifact-download step is `continue-on-error` and silently no-opped. Telling the user "wait for the bot" would have left them waiting forever. When an expected comment doesn't appear, read the workflow file and find out what it actually requires — don't infer from the check's colour.
 - A failing check is worth reading down to the step name. `Check / fail` on Directus meant one step called `Preserve CLA result` running `exit 1` — nothing to do with the code.
+- And down to the *file* it names. A linter failure (isort, mypy, ruff, …) on a file
+  you didn't touch is usually pre-existing — a dependency going stricter than the repo's
+  floor pin (psycopg's `mypy>=2.1.0` started failing `psycopg_build_ext.py` when mypy
+  2.3.1 shipped). Confirm it fails on the repo's own `master` runs too, then report it as
+  pre-existing instead of "fixing" it in your PR.
 
 **Verify any second-hand account of your PR before acting on it.** A confident summary — from the user, a teammate, or another tool — is a claim about state, not the state. Check it against the timeline and the check list yourself, especially when the suggested action is a nudge, because a nudge spent on a wrong diagnosis is the one nudge you had.
 

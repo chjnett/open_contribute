@@ -1,7 +1,7 @@
 ---
 name: first-contribution
 metadata:
-  version: "1.9.0"
+  version: "1.10.0"
 description: Guides a developer through making their first (or next) open-source contribution end to end — picking a beginner-friendly repository, finding a genuinely open "good first issue" (filtering out ones that are secretly already claimed via linked PRs, assignees, or resolving comments), and walking through the actual fix using an AI coding editor. Use this skill whenever the user wants to start contributing to open source, asks for a "good first issue," wants to know if a GitHub repo is beginner-friendly, wants to build up their GitHub contribution history/portfolio, or asks which project to contribute to — even if they only mention a language, framework, or interest area (e.g. "I want to contribute to something Rust-related") rather than saying "open source" explicitly.
 ---
 
@@ -89,7 +89,9 @@ Once a repo is chosen:
    ```
    https://github.com/{owner}/{repo}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22+sort%3Acreated-desc+no%3Aassignee
    ```
-   (fetch this with `web_fetch`, or hit the search API with `+no:assignee` appended to the query)
+   (fetch this with `web_fetch`, or hit the search API with `+no:assignee+-linked:pr`
+   appended to the query — `-linked:pr` pre-filters the "already claimed" cases before
+   you spend a timeline fetch on each; see the checklist's Step 0)
 
 2. For every candidate before recommending it, follow the full checklist in `references/issue-triage-checklist.md`. In short: read the **whole body** for an internal-only notice, check the **Development** section for linked PRs, check **Assignees**, and read the last 2-3 comments for signs it's already resolved or being worked on. Do this via `web_fetch` on the actual issue URL — don't infer staleness just from the `updated_at` timestamp; a recent update is often the sign it just got closed out, not that it's fresh (this bit the user before — an issue's most recent comment said "this looks resolved, closing candidate PR incoming").
 
@@ -124,6 +126,8 @@ Once the user has picked an issue, guide them through the GitHub CLI (`gh`) auto
 
 1. **Authentication Check:** Ask the user to run `gh auth status`. If not logged in or missing scopes, instruct them to run `gh auth login --scopes workflow` and follow the interactive prompts (use the web browser option for easiest setup). If they encounter SSH host key errors during cloning, tell them to run `gh config set git_protocol https`.
 2. **Automated Fork & Clone:** Instead of manual cloning, instruct the user to run `gh repo fork {owner}/{repo} --clone`. This single command creates the fork on their account, clones it locally, and sets up `origin` and `upstream` remotes perfectly.
+
+   If the clone leg fails with an SSH host-key error (and `gh config set git_protocol https` can't write its config either), the fork has still been created — recover by cloning the fork over HTTPS explicitly: `git clone https://github.com/{user}/{repo}.git`, then `git remote add upstream https://github.com/{owner}/{repo}.git`.
 
    **Check `df -h` first.** Monorepos like Grafana need several GB for the clone plus its install, and filling the user's disk is worse than any checklist item. When space or time won't allow it and the change is small, you can skip the clone entirely: fetch the specific files from `raw.githubusercontent.com`, edit them locally, and commit through the API — but use GraphQL `createCommitOnBranch`, not the REST Contents API, since only the former produces the `Verified` commits some repos require. See `references/pr-acceptance-checklist.md` §4b, and be explicit in the PR about any tests you could not run.
 3. **Read the project's contribution guide.** Start at `CONTRIBUTING.md`, but **if it's a stub, follow its link** — Directus's is three lines pointing at a docs site, and everything binding (the CLA mechanism, the mandatory changeset, the past-tense description rule) lives there rather than in the repo. Read `README.md` too for branch and commit conventions.

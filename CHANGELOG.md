@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.0] - 2026-08-16
+
+### Added
+- **Pre-filter issues with search operators before triaging one at a time** (triage
+  checklist Step 0). The search API's `-linked:pr` and `no:assignee` qualifiers answer
+  the "already claimed" and "already assigned" checks at search time, for a whole repo
+  in one call, instead of one timeline fetch per issue.
+- **Read the second age signal on fast-moving repos** (triage checklist Step 6). An
+  issue that has sat unassigned with no linked PR for months is often "doesn't
+  reproduce" or "already fixed", not merely low-priority — a real run found sqlfluff's
+  months-old open bugs were disproportionately unreproducible/already-fixed while every
+  fresh bug got claimed within days.
+- **Check the sibling implementation when a bug is reported against one** (PR checklist
+  §1d). A C extension and a pure-Python fallback (or sync/async, or two dialects) often
+  diverge; the sibling's correct behaviour and error message are the spec for the fix.
+  Learned from psycopg's pure-Python `_parse_row_binary` silently truncating while its C
+  `parse_row_binary` already raised `DataError`.
+- **Check for auto-generated files before editing** (PR checklist §2b). Repos like
+  psycopg generate a sync test file from an async source with a "DO NOT CHANGE" header;
+  edit the source and regenerate, and don't commit generator-version churn.
+- **Run the repo's actual lint config before pushing** (PR checklist §2). A custom isort
+  profile can reorder even two function-local imports (psycopg's `length_sort`), so
+  guessing the order loses a CI round trip.
+- **Read a failing check down to the file, not just the step** (PR checklist §6). A
+  linter failure on a file you didn't touch is usually pre-existing — confirm it fails
+  on the repo's own `master` runs too, then report it as such instead of "fixing" it.
+
+### Fixed
+- **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).
+  When `gh repo fork --clone` fails at the clone leg on an SSH host-key error, the fork
+  is still created — clone it over HTTPS explicitly and add the upstream remote.
+
 ## [1.9.0] - 2026-08-13
 
 ### Added

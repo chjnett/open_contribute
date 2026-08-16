@@ -43,10 +43,19 @@ Directus의 M2A 버그에서 가장 자연스러운 가드는 "이 타입 조건
 
 정리하면: 접근을 확정하기 전에 기존 테스트 케이스마다 손으로 로직을 따라가 보고, 의존하려는 데이터가 픽스처에 실제로 있는지 확인하세요. 몇 분이면 되고, CI 초록불과 리뷰어가 실패를 지켜보는 것의 차이입니다.
 
+## 1d. 한쪽 구현에 대해 버그가 보고되면, 형제 구현을 확인하세요
+
+어떤 프로젝트는 같은 코드 경로를 두 가지로 구현합니다 — C 확장 + 순수 파이썬 폴백, sync/async 사본, 또는 여러 방언. 한쪽에서 보고된 "버그"는 사실 *불일치*인 경우가 많습니다: 형제 쪽은 이미 그 케이스를 올바르게 처리하고 있다는 뜻이죠. psycopg의 순수 파이썬 `_parse_row_binary`는 선언된 길이가 버퍼를 넘는 필드를 조용히 잘랐지만, C `parse_row_binary`는 같은 입력에 대해 이미 `DataError("bad copy data: length exceeding data")`를 던지고 있었습니다. 이렇게 보면 "이게 과연 버그인가?" 논쟁이 명백한 일관성 수정으로 바뀝니다 — 형제 쪽의 동작과 에러 메시지가 곧 스펙입니다. 형제 경로를 grep해서 새 정책을 지어내기보다 그쪽에 맞추세요.
+
 ## 2. 린트와 포매팅
 - 많은 레포가 CI에서 포매팅 검사를 강제합니다(`black`, `ruff`, `prettier`, `eslint` 등).
 - `CONTRIBUTING.md`나 `package.json`/`Makefile`에서 포매팅 명령을 찾아 실행하세요(`make lint`, `npm run format` 등).
 - 사소한 공백이나 스타일 오류가 남은 코드를 제출하지 마세요.
+- 실제 린트 설정을 추측 대신 그대로 돌리세요: `pre-commit run`이 있으면 그걸, 아니면 설정 파일의 정확한 린터 명령을 실행하세요. 커스텀 isort 프로파일은 함수 내 로컬 import 두 줄의 순서까지 바꿉니다 — psycopg는 `length_sort`를 써서 `from psycopg.adapt import X`가 `from psycopg._copy_base import Y`보다 앞에 옵니다. CI에서 발견하지 말고 푸시 전에 로컬에서 돌리세요.
+
+## 2b. 편집 전에 자동 생성 파일인지 확인하세요
+
+어떤 레포는 손으로 쓰는 원본 옆에 생성 파일을 둡니다 — 예를 들어 psycopg는 `tools/async_to_sync.py`로 `tests/test_copy_async.py`에서 `tests/test_copy.py`를 생성하고, "DO NOT CHANGE — change the original instead" 헤더를 붙여둡니다. 생성 파일을 손으로 고치면 조용히 덮어써지거나 CI의 sync 검사가 깨집니다. 파일 헤더를 읽고 생성기 스크립트를 찾으세요 — 원본을 수정하고 재생성하세요. 생성 결과는 그 레포의 생성기 버전이 만드는 것과 바이트 단위로 동일하게 유지하세요 — 생성기가 더 새 버전이거나 오래되면 파일 전체를 다시 포매팅할 수 있고, 그 churn을 커밋에 섞는 건 별도 골칫거리입니다.
 
 ## 3. 커밋 메시지 스타일 맞추기
 - 최근 커밋 10개를 확인하세요: `git log --oneline -n 10`. 클론이 없다면 `gh api "repos/{owner}/{repo}/pulls?state=closed&sort=updated&direction=desc" --jq '[.[]|select(.merged_at!=null)][].title'`로 확인할 수 있습니다.
@@ -130,6 +139,7 @@ gh api "repos/{owner}/{repo}/pulls/{n}/files" --jq '.[].filename'
 - 상황을 보고하기 전에 `gh pr checks <n>`으로 실제 체크 목록을 다시 읽으세요.
 - **"성공"한 봇 워크플로가 아무 일도 안 했을 수 있습니다.** Directus의 `cla-comment.yml`은 초록불로 끝났는데 코멘트는 하나도 안 달렸습니다 — 아티팩트 다운로드 단계가 `continue-on-error`라 조용히 no-op 했기 때문입니다. "봇 기다리세요"라고 했으면 사용자는 영원히 기다렸을 겁니다. 기대한 코멘트가 안 보이면 워크플로 파일을 읽고 실제로 무엇이 필요한지 확인하세요 — 체크의 색깔로 추측하지 마세요.
 - 실패한 체크는 단계 이름까지 읽을 가치가 있습니다. Directus의 `Check / fail`은 `Preserve CLA result`라는 단계가 `exit 1` 한 것이었고, 코드와는 무관했습니다.
+- 그리고 그 체크가 지목한 *파일*까지 읽으세요. 내가 안 건드린 파일에서 나는 린터 실패(isort, mypy, ruff, …)는 대개 사전 존재 이슈입니다 — 의존성이 레포의 하한 핀보다 엄격해진 것(psycopg의 `mypy>=2.1.0`은 mypy 2.3.1이 나오면서 `psycopg_build_ext.py`가 실패하기 시작)입니다. 레포의 `master` 실행에서도 똑같이 실패하는지 확인하고, PR에서 "고치려" 하지 말고 사전 존재라고 보고하세요.
 
 **내 PR에 대한 남의 요약은 행동하기 전에 직접 검증하세요.** 사용자든 동료든 다른 도구든, 자신 있는 요약은 상태에 대한 *주장*이지 상태가 아닙니다. 타임라인과 체크 목록을 직접 대조하세요 — 특히 제안이 재촉일 때 그렇습니다. 틀린 진단에 재촉을 써버리면, 그게 내가 가진 단 한 번이었으니까요.
 

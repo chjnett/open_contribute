@@ -159,7 +159,7 @@ python3 scripts/generate_charts.py
 | :--- | :--- |
 | **"refusing to allow an OAuth App to create or update workflow... without workflow scope"** | `gh` 토큰에 Actions 포함 레포 푸시 권한이 없습니다:<br>`gh auth refresh --scopes workflow` |
 | **"The value of the GITHUB_TOKEN environment variable is being used for authentication."** | 환경변수에 예전 토큰이 남아 있습니다:<br>`unset GITHUB_TOKEN` (Mac/Linux) 또는 `Remove-Item Env:\GITHUB_TOKEN` (Windows) |
-| 클론 중 **"Host key verification failed"** | SSH 키가 설정되지 않았습니다. HTTPS로 전환:<br>`gh config set git_protocol https` |
+| 클론 중 **"Host key verification failed"** | SSH 키가 설정되지 않았습니다. HTTPS로 전환:<br>`gh config set git_protocol https`. 그래도 설정 파일을 못 쓴다면 포크는 이미 생성돼 있습니다 — HTTPS로 명시적으로 클론하세요:<br>`git clone https://github.com/{user}/{repo}.git` 후 `git remote add upstream https://github.com/{owner}/{repo}.git` |
 | **"Commits must have verified signatures"** | 서명된 커밋을 요구하는 레포입니다. `git commit -s`는 DCO sign-off라 이걸 **충족하지 않습니다** — 서명 키가 필요하거나, GraphQL `createCommitOnBranch`로 커밋하세요. |
 | CLA 체크가 계속 pending | CLA는 본인만 서명할 수 있습니다. PR에 달린 봇 링크로 들어가세요. 화면이 비어 보이면 대개 콘텐츠 차단기가 약관 텍스트를 막고 있는 것입니다. |
 
