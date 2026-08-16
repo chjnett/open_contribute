@@ -55,6 +55,25 @@ declared length exceeded the buffer, while its C `parse_row_binary` already rais
 behaviour and error message are your spec. Grep the sibling path and match it rather
 than inventing a new policy.
 
+## 1e. Verify your diff against the current source before submitting — not just run tests
+
+A green suite doesn't prove the change is correct against the code that's actually on
+`main`. Before pushing, grep the current default branch and confirm three things:
+
+- every identifier you used really exists there (don't *assume* "config was already
+  imported" — check it, since that's exactly the claim that's easy to get wrong);
+- the field/type path you read is real and correctly typed (grafana's
+  `config.bootData.user.orgId` is a `number`, so `${orgId}` yields a bare id);
+- every *caller* of the function you changed still behaves correctly (grafana's
+  `createShortLink` calls `buildShortUrl` internally, which is why the shared
+  `beforeEach` default kept the existing k8s-path tests green).
+
+If you can't run the suite, this static pass lets you say "I couldn't run it, but I
+verified X, Y, Z" instead of a bare "couldn't run". A diff the author has already
+checked against `main` is what turns a maintainer's first review into an approve — the
+most common way a small PR dies is a first-review "did you check X?" or a CI failure a
+grep would have caught.
+
 ## 2. Linting and Formatting
 - Many repos enforce formatting checks (e.g., `black`, `ruff`, `prettier`, `eslint`) in their CI pipelines.
 - Find the formatting command in `CONTRIBUTING.md` or `package.json`/`Makefile` and run it (e.g., `make lint` or `npm run format`).

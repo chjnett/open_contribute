@@ -47,6 +47,16 @@ Directus의 M2A 버그에서 가장 자연스러운 가드는 "이 타입 조건
 
 어떤 프로젝트는 같은 코드 경로를 두 가지로 구현합니다 — C 확장 + 순수 파이썬 폴백, sync/async 사본, 또는 여러 방언. 한쪽에서 보고된 "버그"는 사실 *불일치*인 경우가 많습니다: 형제 쪽은 이미 그 케이스를 올바르게 처리하고 있다는 뜻이죠. psycopg의 순수 파이썬 `_parse_row_binary`는 선언된 길이가 버퍼를 넘는 필드를 조용히 잘랐지만, C `parse_row_binary`는 같은 입력에 대해 이미 `DataError("bad copy data: length exceeding data")`를 던지고 있었습니다. 이렇게 보면 "이게 과연 버그인가?" 논쟁이 명백한 일관성 수정으로 바뀝니다 — 형제 쪽의 동작과 에러 메시지가 곧 스펙입니다. 형제 경로를 grep해서 새 정책을 지어내기보다 그쪽에 맞추세요.
 
+## 1e. 제출 전에 현재 소스와 diff를 대조하세요 — 테스트만 돌리지 말고
+
+초록 테스트 스위트가 그 변경이 `main`의 실제 코드에 맞다는 걸 증명하진 않습니다. 푸시 전에 현재 기본 브랜치를 grep해서 세 가지를 확인하세요:
+
+- 사용한 식별자가 실제로 거기 존재하는지 ("config는 이미 import돼 있다"고 *가정*하지 말고 확인하세요 — 틀리기 쉬운 주장이 바로 이런 것입니다);
+- 읽는 필드/타입 경로가 실제로 존재하고 타입이 맞는지 (grafana의 `config.bootData.user.orgId`는 `number`라 `${orgId}`가 bare id를 냅니다);
+- 변경한 함수의 모든 *호출자*가 여전히 올바르게 동작하는지 (grafana의 `createShortLink`가 내부적으로 `buildShortUrl`을 호출해서, 공용 `beforeEach` 기본값이 기존 k8s-path 테스트를 그대로 통과시킵니다).
+
+스위트를 못 돌리면 이 정적 검증을 통해 "못 돌렸지만 X, Y, Z는 확인했다"고 말할 수 있습니다 — 맨몸의 "못 돌림" 대신요. 작성자가 `main`과 대조해 둔 diff가 메인테이너의 첫 리뷰를 approve로 바꿉니다 — 소형 PR이 죽는 가장 흔한 경로는 첫 리뷰의 "X 확인했어요?"나, grep이면 잡았을 CI 실패입니다.
+
 ## 2. 린트와 포매팅
 - 많은 레포가 CI에서 포매팅 검사를 강제합니다(`black`, `ruff`, `prettier`, `eslint` 등).
 - `CONTRIBUTING.md`나 `package.json`/`Makefile`에서 포매팅 명령을 찾아 실행하세요(`make lint`, `npm run format` 등).

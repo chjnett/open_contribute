@@ -28,6 +28,11 @@ All notable changes to this project will be documented in this file.
 - **Read a failing check down to the file, not just the step** (PR checklist §6). A
   linter failure on a file you didn't touch is usually pre-existing — confirm it fails
   on the repo's own `master` runs too, then report it as such instead of "fixing" it.
+- **Verify your diff against the current source before submitting** (PR checklist §1e).
+  Grep the default branch to confirm your identifiers exist, your field/type path is
+  real, and every caller of the changed function still behaves — this is what turns a
+  maintainer's first review into an approve, and it lets you say "couldn't run, but I
+  verified X/Y/Z" instead of a bare "couldn't run".
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).
