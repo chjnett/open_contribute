@@ -19,6 +19,13 @@ Before running `gh pr create`, the agent **must** enforce this checklist. A PR s
 
 If you skip local tests, the PR description must say which files were not executed, why, and which specific parts the reviewer should scrutinise. Maintainers accept "I couldn't run the suite, here's what to check" far better than a silent gamble that CI catches it.
 
+When adding a test to a multiprocessing/pool-based library (billiard, celery,
+multiprocessing-based tools), pass *module-level* functions to the pool, not closures
+defined inside the test. With the default start method (spawn on macOS/Windows), a local
+function can't be pickled, so the worker never starts and the test *hangs* instead of
+failing cleanly — it looks like your change broke the pool when it's just a test-harness
+gotcha (this bit a real run on billiard #427).
+
 ## 1b. Existing tests may encode the bug
 A green test suite does not mean correct behaviour. When a bug shipped, ask why the tests allowed it — often they assert the broken output.
 

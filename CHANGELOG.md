@@ -53,6 +53,9 @@ All notable changes to this project will be documented in this file.
   Step 7). A doc that looks wrong can be a deliberate recent migration — mycli's 2.0.0
   notes deliberately switched to advertising forward-slash commands, so "fixing" the doc
   back undid that change and the reporter's failure just meant an old version.
+- **Use module-level functions in multiprocessing/pool tests** (PR checklist §1). A
+  local closure can't be pickled under the spawn start method, so the test hangs instead
+  of failing cleanly — write the task function at module level (billiard #427).
 
 ### Fixed
 - **Recover from a fork-clone SSH failure** (SKILL Phase 4, README troubleshooting).
