@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.1] - 2026-08-17
+
+### Changed
+- **README "What it has produced" now tracks all 16 PRs opened through the skill**
+  (1 merged: celery/billiard#452; 15 in review across llama_index, outlines, litellm,
+  psycopg, sqlfluff, onyx, grafana, directus), with two new generated charts —
+  contributions-by-repo and contribution-status — added to `scripts/generate_charts.py`.
+  Same update mirrored in README.ko.md.
+
 ## [1.10.0] - 2026-08-16
 
 ### Added
