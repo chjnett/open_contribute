@@ -81,6 +81,27 @@ checked against `main` is what turns a maintainer's first review into an approve
 most common way a small PR dies is a first-review "did you check X?" or a CI failure a
 grep would have caught.
 
+## 1g. When making several PRs from one clone, verify each branch's diff is clean before pushing
+
+A single clone used for multiple PRs will happily ship a branch that carries a
+previous PR's commit. On vLLM, `fix/anthropic-tool-reference-conversion` was branched
+off `fix/precompiled-wheel-variant-fallback`, so the second PR's diff included
+`setup.py` from the first until the rebase `git rebase --onto origin/main <first-commit> <branch>`
+dropped it. The DCO bot catches missing sign-offs; nothing catches a wrong base —
+the PR just grows a file it shouldn't have, and the first review points it out.
+
+Before pushing any branch, diff it against the *upstream* default branch, not your
+fork's copy (they can drift), and confirm the file list is exactly what this PR
+intends:
+
+```bash
+git diff --stat origin/{default_branch}...{branch}   # upstream, not your fork
+```
+
+Also re-check it *after* a force-push rebase — the rebase shown above silently
+re-applies only the target commit, which is what you want, but only when the `--onto`
+base is the upstream tip.
+
 ## 1f. Cut the diff to the smallest change that fixes the issue
 
 A reviewer has to verify every line they didn't write, so merge probability tracks the
@@ -194,6 +215,8 @@ gh api "repos/{owner}/{repo}/pulls/{n}/files" --jq '.[].filename'
 
 ## 6. After opening — read the checks before reporting success
 - On external PRs, most CI is **held for maintainer approval** ("N workflows awaiting approval"). That is the normal flow, not a failure — say so rather than reporting it as a problem.
+- Some repos gate CI on a **label or a merge-count** for first-time contributors, not just approval. vLLM's `pre-run-check` fails with `PR must have the 'verified', 'ready', or 'ready-run-all-tests' label ... or the author must have at least 4 merged PRs (found 0)` — a first-PR author hits this every time, the maintainer has to add the label, and there is nothing for the contributor to fix. A red `pre-run-check` here is onboarding friction, not a defect: read the failure text before treating it as a problem.
+- **DCO is checked by a separate bot and can fail independently of everything else.** vLLM's `DCO` check turns red when the commit lacks a `Signed-off-by:` trailer, even though the code is fine. Fix it with `git commit --amend -s` and a force-push; the check re-runs on the new commit. A `Signed-off-by` trailer is free and harmless on repos that don't require it, so defaulting every commit to `-s` (or amending it in) removes an entire failure class on the first push.
 - Distinguish what the user must act on (an unsigned CLA) from what is simply waiting (reviewer assignment, `policy-bot 0/1 rules approved`).
 - Re-read the actual check list with `gh pr checks <n>` before telling the user where things stand.
 - **A bot workflow that "succeeded" may have done nothing.** Directus's `cla-comment.yml` finished green and posted no comment, because its artifact-download step is `continue-on-error` and silently no-opped. Telling the user "wait for the bot" would have left them waiting forever. When an expected comment doesn't appear, read the workflow file and find out what it actually requires — don't infer from the check's colour.

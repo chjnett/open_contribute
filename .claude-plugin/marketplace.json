@@ -11,7 +11,7 @@
       "name": "first-contribution",
       "description": "Find a repo that actually merges outside PRs, an issue that is genuinely open, and go through the fix to a submitted pull request. Filters repos on availability, gates them on whether external PRs land, and triages every candidate issue against an 8-step checklist ending in whether the defect still exists in current code. Includes an English and a Korean variant, plus a RAG-specific flow.",
       "source": "./",
-      "version": "1.10.1",
+      "version": "1.10.2",
       "license": "MIT",
       "category": "development",
       "homepage": "https://github.com/chjnett/open_contribute",

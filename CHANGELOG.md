@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.2] - 2026-08-17
+
+### Added
+- **Check for first-PR CI gates that are not failures** (PR checklist §6). Some repos
+  gate CI on a maintainer-applied label or on the author's merge count, not just on
+  approval — vLLM's `pre-run-check` fails with "must have the 'verified'/'ready'
+  label ... or at least 4 merged PRs (found 0)" for every first PR. A red
+  `pre-run-check` there is onboarding friction, not a defect; read the failure text
+  before reporting it as a problem.
+- **Default commits to a DCO `Signed-off-by` trailer** (PR checklist §6). The DCO bot
+  is separate and fails independently of the code — vLLM's `DCO` check went red on a
+  clean fix that lacked the trailer. `git commit --amend -s` + force-push fixes it,
+  and the trailer is harmless on repos that don't require it.
+- **Verify each branch's diff when making several PRs from one clone** (PR checklist
+  §1g). A single clone happily ships a branch carrying a previous PR's commit — vLLM's
+  tool-reference PR included `setup.py` from the variant-fallback PR until
+  `git rebase --onto origin/main <first-commit> <branch>` dropped it. Diff against the
+  *upstream* default branch (not your fork's copy), before pushing and again after any
+  force-push rebase.
+- **Reusable repo screener** (`scripts/screen_repos.py`) automating the merge-gate
+  measurements (stale open-PR share, outside-top-5 merge share, one-off authors) with
+  rate-limit backoff, built and used during the vLLM/dlt/mem0 screening pass.
+
 ## [1.10.1] - 2026-08-17
 
 ### Changed
