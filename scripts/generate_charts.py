@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Charts for the open_contribute README, built only from measurements taken 2026-08-12."""
+"""Charts for the open_contribute README. Charts 1-2 from measurements taken
+2026-08-12; charts 3-4 from contributions tracked via `gh` as of 2026-08-17."""
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Patch
 
 INK = "#1f2328"
@@ -107,3 +109,64 @@ fig.savefig("assets/triage_attrition.png", dpi=170, bbox_inches="tight")
 plt.close(fig)
 
 print("wrote assets/merge_gate.png and assets/triage_attrition.png")
+
+
+# ---------------------------------------------------------------- chart 3
+# Contributions by repository, all-time via `gh` as of 2026-08-17.
+fig, ax = plt.subplots(figsize=(8, 4.6), dpi=170)
+repos = [
+    ("outlines", 4, "#6c5ce7"),
+    ("llama_index", 3, "#f0932b"),
+    ("litellm", 3, "#00b894"),
+    ("psycopg", 1, "#0984e3"),
+    ("sqlfluff", 1, "#d63031"),
+    ("onyx", 1, "#e17055"),
+    ("grafana", 1, "#fdcb6e"),
+    ("directus", 1, "#a29bfe"),
+    ("billiard", 1, "#636e72"),
+]
+repos = sorted(repos, key=lambda r: -r[1])
+names = [r[0] for r in repos]
+counts = [r[1] for r in repos]
+colors = [r[2] for r in repos]
+y = np.arange(len(names))
+ax.barh(y, counts, color=colors, height=0.62, zorder=3)
+for bar, c in zip(ax.patches, counts):
+    ax.text(bar.get_width() + 0.08, bar.get_y() + bar.get_height() / 2,
+            str(c), va="center", ha="left", fontsize=13, fontweight="bold", color=INK)
+for i, n in enumerate(names):
+    if n == "billiard":
+        ax.text(counts[i] + 0.08, i, "\u2713 merged", va="center", ha="left",
+                fontsize=11, color=GREEN, fontweight="bold")
+ax.set_yticks(y)
+ax.set_yticklabels(names, fontsize=12)
+ax.invert_yaxis()
+ax.set_xlim(0, max(counts) + 1.4)
+ax.set_xlabel("Pull requests opened", fontsize=11)
+ax.spines[["top", "right"]].set_visible(False)
+ax.grid(axis="x", color=GREY, linewidth=0.8, zorder=0)
+ax.set_axisbelow(True)
+ax.set_title("Open-Source Contributions by Repository", fontsize=15, fontweight="bold", pad=12)
+fig.tight_layout()
+fig.savefig("assets/contributions-by-repo.png", bbox_inches="tight")
+plt.close(fig)
+
+# ---------------------------------------------------------------- chart 4
+# Contribution status: merged vs open.
+fig, ax = plt.subplots(figsize=(5.4, 4.4), dpi=170)
+merged, open_prs = 1, 15
+sizes = [merged, open_prs]
+labels = ["Merged", "Open"]
+donut_colors = [GREEN, "#74b9ff"]
+wedges, _ = ax.pie(sizes, colors=donut_colors, startangle=90, counterclock=False,
+                   explode=(0.04, 0), wedgeprops=dict(width=0.42, edgecolor="white", linewidth=2))
+ax.text(0, 0.06, "16", ha="center", va="center", fontsize=34, fontweight="bold", color=INK)
+ax.text(0, -0.24, "PRs total", ha="center", va="center", fontsize=12, color=MUTED)
+ax.legend(wedges, [f"{l}  ({s})" for l, s in zip(labels, sizes)],
+          loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=11)
+ax.set_title("Contribution Status", fontsize=15, fontweight="bold", pad=10)
+fig.tight_layout()
+fig.savefig("assets/contribution-status.png", bbox_inches="tight")
+plt.close(fig)
+
+print("wrote assets/contributions-by-repo.png and assets/contribution-status.png")

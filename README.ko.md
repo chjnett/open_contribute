@@ -127,12 +127,31 @@ bash scripts/package_skill.sh
 
 ### 실제로 만들어낸 것
 
-이 스킬이 아무것도 없는 상태에서 찾아내고 근본 원인까지 특정한 PR 두 건:
+이 스킬이 아무것도 없는 상태에서 찾아내고 근본 원인까지 특정한 PR 열여섯 건 — 그중 하나는 이미 머지됐고, 나머지는 리뷰 중입니다:
+
+<div align="center">
+  <img src="./assets/contributions-by-repo.png" alt="레포별 오픈소스 기여" width="720">
+  <img src="./assets/contribution-status.png" alt="기여 상태: 머지 1, 오픈 15" width="420">
+</div>
 
 | PR | 버그 | 상태 |
 | :--- | :--- | :--- |
-| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | 리소스 namespace를 org ID로 써서 복사된 짧은 URL에 `orgId=org-5`가 박힘 | 체크 전체 통과, 리뷰 중 |
-| [directus/directus#28092](https://github.com/directus/directus/pull/28092) | M2A union에 프래그먼트를 쓰면 모든 필드가 `null` | 체크 전체 통과, patch coverage 100%, 리뷰 중 |
+| [celery/billiard#452](https://github.com/celery/billiard/pull/452) | 워커 예외가 래핑되어 `BaseException`이 호출자에게 전파되지 않음 | ✅ **머지됨** |
+| [run-llama/llama_index#22723](https://github.com/run-llama/llama_index/pull/22723) | Bedrock Cohere 모델이 `additional_kwargs`를 조용히 버려서 `output_dimension`이 API에 도달하지 못함 | 리뷰 중 |
+| [run-llama/llama_index#22724](https://github.com/run-llama/llama_index/pull/22724) | mcp 2.x `streamable_http_client`가 2-튜플을 반환하는데 `client.py`는 3-튜플로 풀고 있음 | 리뷰 중 |
+| [run-llama/llama_index#22725](https://github.com/run-llama/llama_index/pull/22725) | `Dispatcher.__init__`가 가변 리스트 기본값(`B006`)을 써서 핸들러 상태가 인스턴스 간 공유됨 | 리뷰 중 |
+| [dottxt-ai/outlines#2011](https://github.com/dottxt-ai/outlines/pull/2011) | SGLang 백엔드가 vLLM은 정상 전달하는 `whitespace_pattern`을 버림 | 리뷰 중 |
+| [dottxt-ai/outlines#2012](https://github.com/dottxt-ai/outlines/pull/2012) | `JsonSchema`/`CFG`가 `__eq__`만 정의하고 `__hash__`가 없어 해시 불가 | 리뷰 중 |
+| [dottxt-ai/outlines#2013](https://github.com/dottxt-ai/outlines/pull/2013) | `mlxlm.generate_batch`의 falsy 가드가 truthy-but-falsy 출력 타입을 통과시킴 | 리뷰 중 |
+| [dottxt-ai/outlines#2014](https://github.com/dottxt-ai/outlines/pull/2014) | `format_output_type`이 `__bool__`가 `False`인 로짓 프로세서를 버림 | 리뷰 중 |
+| [BerriAI/litellm#37163](https://github.com/BerriAI/litellm/pull/37163) | Redis 클러스터 종료 시 `None` 커넥션 풀 역참조로 빌링 플러시가 중단됨 | 리뷰 중 |
+| [BerriAI/litellm#37164](https://github.com/BerriAI/litellm/pull/37164) | `langfuse_otel`이 `/v1/rerank`의 observation output을 설정하지 않음 | 리뷰 중 |
+| [BerriAI/litellm-docs#912](https://github.com/BerriAI/litellm-docs/pull/912) | 문서가 없는 함수 `litellm.turn_on_message_logging`을 참조 | 리뷰 중 |
+| [psycopg/psycopg#1383](https://github.com/psycopg/psycopg/pull/1383) | 바이너리 복사 필드 길이가 데이터를 초과하면 일반 오류 대신 `DataError`가 나야 함 | 리뷰 중 |
+| [sqlfluff/sqlfluff#8350](https://github.com/sqlfluff/sqlfluff/pull/8350) | Dockerfile의 고정되지 않은 `pip-tools`가 `pip-compile`을 깨뜨림 | 리뷰 중 |
+| [onyx-dot-app/onyx#14011](https://github.com/onyx-dot-app/onyx/pull/14011) | 이미지 없는 배치에도 비전 LLM 경고가 발생 | 리뷰 중 |
+| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | 리소스 namespace를 org ID로 써서 복사된 짧은 URL에 `orgId=org-5`가 박힘 | 리뷰 중 |
+| [directus/directus#28092](https://github.com/directus/directus/pull/28092) | M2A union에 프래그먼트를 쓰면 모든 필드가 `null` | 리뷰 중 |
 
 두 번째 실행이 깔때기를 더 잘 보여줍니다: 백엔드 레포 30곳 가용성 심사 → 기여 이슈가 열린 13곳 → 머지 게이트 통과 11곳 → **후보 이슈 229건 연결 PR 검사** → 아직 잡을 수 있는 26건 → `main`에서 버그 실재가 확인된 1건.
 
@@ -147,7 +166,7 @@ bash scripts/package_skill.sh
 
 ## 차트 재현
 
-두 이미지는 2026-08-12에 실측한 데이터만 사용하며, 측정 방법이 차트에 함께 적혀 있습니다:
+머지 게이트와 트라이지 차트는 2026-08-12에 실측한 데이터만 사용하며, 측정 방법이 차트에 함께 적혀 있습니다. 기여 차트는 이 스킬로 연 PR들을 `gh`로 추적한 데이터입니다(2026-08-17 기준):
 
 ```bash
 python3 scripts/generate_charts.py

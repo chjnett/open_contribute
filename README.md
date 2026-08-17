@@ -127,12 +127,31 @@ Every rule in the checklist was added after it cost a real run something.
 
 ### What it has produced
 
-Two pull requests, each found and root-caused by the skill from a cold start:
+Sixteen pull requests, each found and root-caused by the skill from a cold start — one already merged, the rest in review:
+
+<div align="center">
+  <img src="./assets/contributions-by-repo.png" alt="Open-source contributions by repository" width="720">
+  <img src="./assets/contribution-status.png" alt="Contribution status: 1 merged, 15 open" width="420">
+</div>
 
 | PR | Bug | State |
 | :--- | :--- | :--- |
-| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | Copied short URLs carried `orgId=org-5` because the resource namespace was used as the org ID | All checks green, in review |
-| [directus/directus#28092](https://github.com/directus/directus/pull/28092) | GraphQL fragments on an M2A union resolved every field to `null` | All checks green, 100% patch coverage, in review |
+| [celery/billiard#452](https://github.com/celery/billiard/pull/452) | Worker exceptions were wrapped instead of propagating `BaseException` to the caller | ✅ **merged** |
+| [run-llama/llama_index#22723](https://github.com/run-llama/llama_index/pull/22723) | Bedrock Cohere models silently dropped `additional_kwargs`, so `output_dimension` never reached the API | In review |
+| [run-llama/llama_index#22724](https://github.com/run-llama/llama_index/pull/22724) | mcp 2.x `streamable_http_client` yields a 2-tuple but `client.py` still unpacked a 3-tuple | In review |
+| [run-llama/llama_index#22725](https://github.com/run-llama/llama_index/pull/22725) | `Dispatcher.__init__` used mutable list defaults (`B006`), sharing handler state between instances | In review |
+| [dottxt-ai/outlines#2011](https://github.com/dottxt-ai/outlines/pull/2011) | SGLang backend dropped `whitespace_pattern` that vLLM forwards correctly | In review |
+| [dottxt-ai/outlines#2012](https://github.com/dottxt-ai/outlines/pull/2012) | `JsonSchema`/`CFG` defined `__eq__` without `__hash__`, making them unhashable | In review |
+| [dottxt-ai/outlines#2013](https://github.com/dottxt-ai/outlines/pull/2013) | `mlxlm.generate_batch` used a falsy guard that let truthy-but-falsy output types bypass the check | In review |
+| [dottxt-ai/outlines#2014](https://github.com/dottxt-ai/outlines/pull/2014) | `format_output_type` discarded a logits processor whose `__bool__` returns `False` | In review |
+| [BerriAI/litellm#37163](https://github.com/BerriAI/litellm/pull/37163) | Redis cluster shutdown dereferenced a `None` connection pool, aborting billing flush | In review |
+| [BerriAI/litellm#37164](https://github.com/BerriAI/litellm/pull/37164) | `langfuse_otel` never set observation output for `/v1/rerank` | In review |
+| [BerriAI/litellm-docs#912](https://github.com/BerriAI/litellm-docs/pull/912) | Docs referenced nonexistent `litellm.turn_on_message_logging` | In review |
+| [psycopg/psycopg#1383](https://github.com/psycopg/psycopg/pull/1383) | Binary copy field length exceeding data raised a generic error instead of `DataError` | In review |
+| [sqlfluff/sqlfluff#8350](https://github.com/sqlfluff/sqlfluff/pull/8350) | Unpinned `pip-tools` in the Dockerfile broke `pip-compile` | In review |
+| [onyx-dot-app/onyx#14011](https://github.com/onyx-dot-app/onyx/pull/14011) | Vision-LLM warning fired for batches without images | In review |
+| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | Copied short URLs carried `orgId=org-5` because the resource namespace was used as the org ID | In review |
+| [directus/directus#28092](https://github.com/directus/directus/pull/28092) | GraphQL fragments on an M2A union resolved every field to `null` | In review |
 
 The second run is the better illustration of the funnel: 30 backend repos screened for availability → 13 with open contribution issues → 11 through the merge gate → **229 candidate issues checked for linked PRs** → 26 still claimable → one with a defect verified live in `main`.
 
@@ -147,7 +166,7 @@ The second run is the better illustration of the funnel: 30 backend repos screen
 
 ## Reproducing the charts
 
-Both images come only from measurements taken on 2026-08-12, with the method printed on each chart:
+The merge-gate and triage charts come only from measurements taken on 2026-08-12, with the method printed on each chart; the contribution charts track PRs opened through this skill via `gh` (as of 2026-08-17):
 
 ```bash
 python3 scripts/generate_charts.py
