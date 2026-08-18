@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.5] - 2026-08-18
+
+### Added
+- **Account for distributed/cluster modes and memory limits during database operations** (PR checklist §1i). A fix that works perfectly in a local single-node test suite can cause crashes or OOMs in production. On mem0 #6995/PR #6996, deleting Valkey/Redis documents explicitly required escaping glob characters in prefix matches (`_escape_glob`), utilizing non-blocking `UNLINK` instead of synchronous `DEL`, avoiding `list(scan_iter(...))` to prevent memory exhaustion, and chunking deletions (`chunk_size = 1`) under Cluster Mode to avoid `CROSSSLOT` errors. Always review database teardown paths against distributed constraints and large-scale data sets.
+
 ## [1.10.4] - 2026-08-17
 
 ### Added

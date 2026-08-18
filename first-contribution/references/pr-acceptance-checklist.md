@@ -131,6 +131,15 @@ not strictly required by the fix — unrelated refactors, drive-by formatting, "
 here" improvements. Move genuinely separate changes into their own PR. Every line you
 can cut is a line the reviewer doesn't have to verify.
 
+## 1i. Account for distributed/cluster modes and memory limits during database operations (e.g., Redis/Valkey)
+
+A fix that works perfectly in a local single-node environment or testing suite can cause severe failures, crashes, or out-of-memory errors in large-scale production environments or distributed modes (such as Redis/Valkey Cluster).
+
+- **Prevent `CROSSSLOT` Errors**: In a Redis/Valkey Cluster, executing multi-key commands (like `delete(*keys)` or `unlink(*keys)`) where keys reside in different slots will cause a `CROSSSLOT` crash. When a cluster is detected, process deletions one key at a time (`chunk_size = 1`), and batch them (e.g., in chunks of 500) only for standalone instances.
+- **Prevent Memory Exhaustion (OOM)**: Never load an entire database keyspace into RAM using `list(scan_iter(...))`. Iterate over the generator directly and process/delete keys in bounded chunks.
+- **Escape Glob Characters in Patterns**: If a collection name or key prefix contains glob characters (such as `*`, `?`, `[`, or `]`), a `SCAN MATCH` pattern will treat them as wildcards. Escape them with backslashes to avoid accidentally matching and deleting data from unrelated collections.
+- **Prefer Asynchronous Deletion**: When deleting large amounts of keys, use non-blocking asynchronous commands like `UNLINK` instead of the blocking synchronous `DEL` command to keep the thread pool free. (See mem0 #6995 for a real-world case study).
+
 ## 2. Linting and Formatting
 - Many repos enforce formatting checks (e.g., `black`, `ruff`, `prettier`, `eslint`) in their CI pipelines.
 - Find the formatting command in `CONTRIBUTING.md` or `package.json`/`Makefile` and run it (e.g., `make lint` or `npm run format`).
