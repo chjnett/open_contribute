@@ -180,8 +180,16 @@ If the user has no signing key configured, do not create one for them — say th
 
 CLAs come in at least two shapes, and the second one is easy to walk into:
 
-- **External signing service** (cla-assistant and friends). Grafana uses this: a bot comments with a link, the user authorises an app and signs there. Obviously not something you can do for them.
-- **A file edit inside the PR.** Directus asks contributors to add their GitHub username to `contributors.yml` in the pull request itself. Mechanically that is a one-line diff you are perfectly capable of making — and making it *is* the act of signing. Recognise it for what it is and hand it back to the user.
+- **External signing service** (cla-assistant and friends). Grafana uses this, and so do litellm and mem0: a bot comments with a link, the user authorises an app and signs there. Obviously not something you can do for them.
+- **A file edit inside the PR.** Directus and a few others ask contributors to add their GitHub username to `contributors.yml` in the pull request itself. Mechanically that is a one-line diff you are perfectly capable of making — and making it *is* the act of signing. Recognise it for what it is and hand it back to the user.
+
+**For a cla-assistant-style CLA, the user must do it in a browser — there is no API or CLI route, and you can't do it for them.** The bot leaves a `not_signed` badge and a link like `https://cla-assistant.io/{org}/{repo}?pullRequest={n}`. Hand that exact link to the user with a one-line instruction: *open it, sign in with GitHub, click the agreement.* A few practical notes:
+
+- **Give the user the full PR URL with the query string**, not just the repo root — the service keys on `?pullRequest={n}` so it knows which agreement to present. A bare repo link (or a blank rendering under a content blocker) leads nowhere.
+- **One signature covers the whole org.** litellm's two PRs both needed it, but one sign on either satisfied both, because the service tracks the account, not the individual PR.
+- **After signing, the check may need a re-trigger.** The bot's comment says "Let us recheck" — if the badge stays `not_signed` after the user signs, have them click that recheck, or push an empty amend to re-run the check.
+- **The CLA bot's status is per-PR.** If the user signs while reviewing one PR, a *second* PR you open later on the same repo may show `not_signed` until it self-detects (usually quickly) or you nudge the recheck.
+- **Spot the CLA requirement by the workflow, not by guessing.** Some repos gate on a `pr-gate.yml` that auto-closes issues lacking an `accepted` label (mem0) or on a separate CLA workflow. Grep `.github/workflows` for `cla` and read whether the gate is CLA-only or also checks issue labels (§0).
 
 Read the CLA workflow rather than guessing which shape applies:
 
