@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **Account for distributed/cluster modes and memory limits during database operations** (PR checklist §1i). A fix that works perfectly in a local single-node test suite can cause crashes or OOMs in production. On mem0 #6995/PR #6996, deleting Valkey/Redis documents explicitly required escaping glob characters in prefix matches (`_escape_glob`), utilizing non-blocking `UNLINK` instead of synchronous `DEL`, avoiding `list(scan_iter(...))` to prevent memory exhaustion, and chunking deletions (`chunk_size = 1`) under Cluster Mode to avoid `CROSSSLOT` errors. Always review database teardown paths against distributed constraints and large-scale data sets.
+- **A PR's head reference can desync from its branch when the branch is force-pushed** (PR checklist §6). grafana #130614's fork branch was force-pushed back to a one-commit ~4.9M-line state and the PR read as closed with a stale head SHA, even after the branch was recovered to the correct two-file commit (verified via `git ls-remote`). Two API reads disagreed: the branch's real tip was good while the PR's `head.sha` still named the broken commit. Cross-check the fork branch's actual tip, recover the branch first, then sort out the PR state; if it won't reopen or adopt the new head, explain the desync plainly on the PR and offer to reopen or open a fresh PR on the same branch.
 
 ## [1.10.4] - 2026-08-17
 

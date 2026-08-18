@@ -274,6 +274,13 @@ gh api "repos/{owner}/{repo}/actions/runs?event=pull_request" --jq '[.workflow_r
 
 Had it been acted on, it would have `@`-mentioned two maintainers within a day of opening, to ask for something that wasn't blocked — three anti-patterns from §6 of the message templates at once.
 
+**A PR's head reference can desync from its branch when the branch is force-pushed externally, and it reads oddly — verify the *actual* refs before assuming the PR is wrong.** On grafana #130614, the `fix/shorturl-org-id` fork branch was force-pushed (by our own token) back to a huge one-commit state that added ~4.9M lines, and the PR went closed with a stale head SHA. The recovery — recreate the correct two-file commit from the intended diff, force-push the fork branch, confirm with `git ls-remote` that the branch really points at the good SHA — left the branch correct while `gh pr view` still reported the old head and CLOSED. Two API reads disagreed: `git ls-remote` said the branch was the good commit, while the PR's `head.sha` still named the broken one.
+
+So when a PR's stated head/files look wrong:
+- cross-check the *fork branch's* actual tip with `git ls-remote <fork-url> <branch>` or the commits endpoint — the PR's cached `head_sha` and a closed/reopened state can be stale;
+- recover the branch first (recreate the intended commit from the reviewed diff, `git push --force`), *then* sort out the PR state;
+- if the PR refuses to reopen or won't adopt the new head, tell the maintainer plainly on the PR — "the branch now points at <sha> (two-file change, same as you approved), but the PR still reads as the old head/closed" — and ask whether to reopen or open a fresh PR on the same branch. Do not silently abandon a PR whose branch you've already fixed, and don't burn the courtesy of explaining the desync.
+
 ## 7. Audit against the project's own guide before calling it done
 **`CONTRIBUTING.md` is often a stub.** Directus's is three lines pointing at `directus.com/docs/community/contribution/pull-requests`, and everything binding — the CLA mechanism, the mandatory changeset, the past-tense description rule — lives on that page, not in the repo. Follow the pointer; a repo-only reading misses the authoritative source.
 

@@ -209,6 +209,13 @@ gh api "repos/{owner}/{repo}/actions/runs?event=pull_request" --jq '[.workflow_r
 
 그대로 따랐다면 PR 올린 지 하루도 안 돼 메인테이너 둘을 동시에 `@` 하면서, 막혀 있지도 않은 것을 요청하는 셈이었습니다 — 메시지 템플릿 §6의 안티패턴 세 개를 한 번에 밟는 겁니다.
 
+**PR의 head 참조는 브랜치가 외부에서 force-push로 바뀌면 브랜치와 어긋날 수 있고, 그 결과가 이상하게 읽힙니다 — PR이 틀렸다고 판단하기 전에 실제 ref를 확인하세요.** grafana #130614에서 `fix/shorturl-org-id` 포크 브랜치가 (우리 토큰으로) grafana 전체 소스(+약 491만 줄)를 담은 거대한 단일 커밋으로 force-push됐고, PR은 stale head SHA를 가진 채 닫혔습니다. 복구 — 의도한 diff로 올바른 두-파일 커밋을 다시 만들고, 포크 브랜치를 force-push하고, `git ls-remote`로 브랜치가 정말 좋은 커밋을 가리키는지 확인 — 를 마치면 브랜치는 올바른데 `gh pr view`는 여전히 옛 head와 CLOSED라고 보고했습니다. 두 API 읽기가 서로 달랐습니다: `git ls-remote`는 브랜치가 좋은 커밋이라고 했고, PR의 `head.sha`는 여전히 깨진 것을 가리켰습니다.
+
+그래서 PR이 보고하는 head/파일이 틀려 보일 때:
+- PR의 캐시된 `head_sha`와 닫힘/재오픈 상태가 stale일 수 있으니, 먼저 *포크 브랜치*의 실제 tip을 `git ls-remote <포크-url> <브랜치>`나 커밋 엔드포인트로 교차 확인하세요;
+- 브랜치를 먼저 복구하고(리뷰된 diff로 의도된 커밋을 재생성하고, `git push --force`), *그다음* PR 상태를 정리하세요;
+- PR이 재오픈을 거부하거나 새 head를 안 받아들이면 PR에 정직하게 알리세요 — "브랜치는 이제 <sha>(두 파일 변경, 당신이 승인한 것과 동일)를 가리키는데 PR은 아직 옛 head/닫힘으로 읽힙니다" — 그리고 재오픈할지 같은 브랜치로 새 PR을 열지 물어보세요. 이미 고친 브랜치를 갖고 PR을 조용히 버리지 말고, desync를 설명하는 예의도 써버리지 마세요.
+
 ## 7. 끝내기 전에 프로젝트 자체 가이드와 대조하세요
 **`CONTRIBUTING.md`는 껍데기인 경우가 많습니다.** Directus의 것은 `directus.com/docs/community/contribution/pull-requests`를 가리키는 3줄이고, 구속력 있는 내용은 전부 그 페이지에 있습니다 — CLA 방식, 필수 changeset, 과거형 설명 규칙. 링크를 따라가세요. 레포만 읽으면 정작 권위 있는 출처를 놓칩니다.
 
