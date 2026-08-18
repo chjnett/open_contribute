@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.3] - 2026-08-17
+
+### Added
+- **Treat an issue's suggested fix as a hint, not a spec — verify it against the real API** (PR checklist §1e). A well-written report's proposed fix is the reporter's guess, not the implementation contract. mem0 #6995 suggested adding the `DD` flag to `FT.DROPINDEX`, but Valkey's `FT.DROPINDEX` does not support `DD` (verified against valkey.io) — the first PR was closed and the fix had to be reworked to `SCAN` + `DEL`. Two sources inside the same issue can disagree (the comment had the right approach, the prose pointed the wrong way); the implementation follows the API, and the PR description says why it diverged from the issue's suggestion.
+
 ## [1.10.2] - 2026-08-17
 
 ### Added

@@ -62,7 +62,23 @@ declared length exceeded the buffer, while its C `parse_row_binary` already rais
 behaviour and error message are your spec. Grep the sibling path and match it rather
 than inventing a new policy.
 
-## 1e. Verify your diff against the current source before submitting — not just run tests
+## 1e. The issue's suggested fix is a hint, not a spec — verify it against the real API
+
+A well-written bug report often includes a suggested fix. It is the reporter's best
+guess, not the implementation contract. On mem0, issue #6995 suggested adding the `DD`
+flag to `FT.DROPINDEX`; the maintainer's reviewer pointed out Valkey's
+`FT.DROPINDEX` does not support `DD` at all (its signature is
+`FT.DROPINDEX <index-name>` only), so the first PR was closed and the approach had to
+be reworked to `SCAN` + `DEL`. The issue's own comment had suggested the correct
+approach; the prose in the body pointed the wrong way.
+
+Before committing to a fix that comes from an issue body, check the underlying API's
+official documentation (the command reference, the SDK docs, the wire format) that the
+suggested operation actually exists — and note that *two sources inside the same issue
+can disagree*. When they do, the implementation should follow the API, and the PR
+description should say why it diverged from the issue's suggestion.
+
+## 1f. Verify your diff against the current source before submitting — not just run tests
 
 A green suite doesn't prove the change is correct against the code that's actually on
 `main`. Before pushing, grep the current default branch and confirm three things:
@@ -102,7 +118,7 @@ Also re-check it *after* a force-push rebase — the rebase shown above silently
 re-applies only the target commit, which is what you want, but only when the `--onto`
 base is the upstream tip.
 
-## 1f. Cut the diff to the smallest change that fixes the issue
+## 1h. Cut the diff to the smallest change that fixes the issue
 
 A reviewer has to verify every line they didn't write, so merge probability tracks the
 diff size, not the effort that went into it: `size/small` PRs get reviewed in minutes,
