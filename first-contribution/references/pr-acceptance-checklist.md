@@ -185,6 +185,29 @@ gh api "repos/{owner}/{repo}/commits?sha={branch}" --jq '.[].commit.verification
 
 If the user has no signing key configured, do not create one for them — say the repo requires signed commits and let them set it up, or use the API route in §4b, which GitHub signs for you.
 
+**A green `signed-commits` CI check does NOT mean the repo doesn't enforce signatures — the enforcement often lives in a separate branch *ruleset*, not the CI.** On grafana, the `signed-commits` workflow passed for an unsigned commit and the branch's classic protection had no `required_signatures` entry, but an active **ruleset** named `Signed Commits` (rule `required_signatures`, target `~ALL`) still blocks the merge. To find the real gate, query the rulesets, not just the status checks:
+
+```bash
+gh api "repos/{owner}/{repo}/rulesets?target=branch" --jq '.[] | select(.enforcement=="active") | {name, enforcement, rules: [.rules[]?.type]}'
+```
+
+**If the user already has an SSH key on GitHub, signing is a two-line local setup — no GPG needed.** SSH signature format is built into git:
+
+```bash
+git config gpg.format ssh
+git config user.signingkey "$HOME/.ssh/id_ed25519.pub"   # the key registered on GitHub
+git commit --amend -S -s --no-edit
+git push --force fork {branch}
+```
+
+`~/.gitconfig` may be read-only in a sandbox, so scope both `git config` calls to the local repo (no `--global`). After the push, GitHub verifies the SSH signature against the key on the account:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/{sha}" --jq '.commit.verification | "\(.verified) \(.reason)"'   # verified / valid
+```
+
+This satisfies an active `required_signatures` ruleset the same way a GPG-signed commit does.
+
 **CLA** — a legal agreement. **Never sign or accept a CLA on the user's behalf**, and treat a bare "yes" or "go ahead" as agreement to the *task*, not informed consent to a legal document. Point at the agreement text, say plainly that only they can accept it, and carry on with everything else — a pending CLA usually blocks merge and nothing else, so the PR can still be opened and reviewed.
 
 CLAs come in at least two shapes, and the second one is easy to walk into:

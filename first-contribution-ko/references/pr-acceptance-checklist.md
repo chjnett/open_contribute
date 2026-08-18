@@ -124,6 +124,29 @@ gh api "repos/{owner}/{repo}/commits?sha={branch}" --jq '.[].commit.verification
 
 사용자에게 서명 키가 없다면 대신 만들어주지 마세요 — 이 레포는 서명된 커밋을 요구한다고 알리고 직접 설정하게 하거나, GitHub이 대신 서명해주는 §4b의 API 방식을 쓰세요.
 
+**초록 `signed-commits` CI 체크가 이 레포가 서명을 요구하지 않는다는 뜻은 아닙니다 — 실제 강제는 CI가 아니라 별도 브랜치 *ruleset*에 있는 경우가 많습니다.** grafana에서 `signed-commits` 워크플로는 서명 없는 커밋에 대해 통과했고, 클래식 브랜치 보호 규칙에도 `required_signatures` 항목이 없었지만, **`Signed Commits`** 라는 active ruleset(rule `required_signatures`, 대상 `~ALL`)이 여전히 머지를 막았습니다. 진짜 게이트를 찾으려면 상태 체크가 아니라 ruleset을 조회하세요:
+
+```bash
+gh api "repos/{owner}/{repo}/rulesets?target=branch" --jq '.[] | select(.enforcement=="active") | {name, enforcement, rules: [.rules[]?.type]}'
+```
+
+**사용자가 GitHub에 이미 SSH 키를 갖고 있다면 서명은 GPG 없이 로컬에서 두 줄로 끝납니다.** SSH 서명 포맷은 git에 내장되어 있습니다:
+
+```bash
+git config gpg.format ssh
+git config user.signingkey "$HOME/.ssh/id_ed25519.pub"   # GitHub에 등록된 키
+git commit --amend -S -s --no-edit
+git push --force fork {브랜치}
+```
+
+`~/.gitconfig`는 샌드박스에서 읽기 전용일 수 있으니 두 `git config` 모두 `--global` 없이 로컬 레포에 지정하세요. 푸시 후 GitHub이 계정의 키로 SSH 서명을 검증합니다:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/{sha}" --jq '.commit.verification | "\(.verified) \(.reason)"'   # verified / valid
+```
+
+이렇게 하면 GPG 서명 커밋과 마찬가지로 active `required_signatures` ruleset을 만족합니다.
+
 **CLA** — 법적 계약입니다. **사용자를 대신해 CLA에 서명하거나 동의하지 마세요.** 그리고 짧은 "ㅇㅇ"이나 "진행해"는 *작업*에 대한 동의이지 법적 문서에 대한 숙지된 동의가 아닙니다. 약관 본문을 안내하고 본인만 수락할 수 있다고 분명히 말한 뒤 나머지는 계속 진행하세요 — 대기 중인 CLA는 보통 머지만 막으므로 PR을 열고 리뷰받는 데는 지장이 없습니다.
 
 CLA는 최소 두 가지 형태가 있고, 두 번째가 무심코 넘어가기 쉽습니다:

@@ -189,6 +189,42 @@ Read the CLA workflow rather than guessing which shape applies:
 gh api "repos/{owner}/{repo}/contents/.github/workflows" --jq '.[].name' | grep -i cla
 ```
 
+**A green `signed-commits` CI check does NOT mean the repo doesn't enforce signatures — the enforcement often lives in a separate branch *ruleset*, not the CI.** On grafana, the `signed-commits` workflow passed for an unsigned commit and the branch's classic protection had no `required_signatures` entry, but an active **ruleset** named `Signed Commits` (rule `required_signatures`, target `~ALL`) still blocks the merge. To find the real gate, query the rulesets, not just the status checks:
+
+```bash
+gh api "repos/{owner}/{repo}/rulesets?target=branch" --jq '.[] | select(.enforcement=="active") | {name, enforcement, rules: [.rules[]?.type]}'
+```
+
+**If the user already has an SSH key on GitHub, signing is a two-line local setup — no GPG needed.** SSH signature format is built into git:
+
+```bash
+git config gpg.format ssh
+git config user.signingkey "$HOME/.ssh/id_ed25519.pub"   # the key registered on GitHub
+git commit --amend -S -s --no-edit
+git push --force fork {branch}
+```
+
+`~/.gitconfig` may be read-only in a sandbox, so scope both `git config` calls to the local repo (no `--global`). After the push, GitHub verifies the SSH signature against the key on the account:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/{sha}" --jq '.commit.verification | "\(.verified) \(.reason)"'   # verified / valid
+```
+
+This satisfies an active `required_signatures` ruleset the same way a GPG-signed commit does.
+
+**CLA** — a legal agreement. **Never sign or accept a CLA on the user's behalf**, and treat a bare "yes" or "go ahead" as agreement to the *task*, not informed consent to a legal document. Point at the agreement text, say plainly that only they can accept it, and carry on with everything else — a pending CLA usually blocks merge and nothing else, so the PR can still be opened and reviewed.
+
+CLAs come in at least two shapes, and the second one is easy to walk into:
+
+- **External signing service** (cla-assistant and friends). Grafana uses this: a bot comments with a link, the user authorises an app and signs there. Obviously not something you can do for them.
+- **A file edit inside the PR.** Directus asks contributors to add their GitHub username to `contributors.yml` in the pull request itself. Mechanically that is a one-line diff you are perfectly capable of making — and making it *is* the act of signing. Recognise it for what it is and hand it back to the user.
+
+Read the CLA workflow rather than guessing which shape applies:
+
+```bash
+gh api "repos/{owner}/{repo}/contents/.github/workflows" --jq '.[].name' | grep -i cla
+```
+
 ## 4b. Committing without a clone (and getting a verified commit)
 For a small change in a very large repo, cloning may cost more disk and time than the change is worth. You can commit through the API instead — but the two API routes are not equivalent:
 
