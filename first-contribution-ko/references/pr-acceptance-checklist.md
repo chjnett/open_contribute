@@ -8,6 +8,10 @@
 - `gh issue view <이슈번호>`로 확인하세요. Assignees 목록에 사용자가 없으면 **중단**하고, 선점 코멘트를 남긴 뒤 메인테이너가 할당해줄 때까지 기다려야 한다고 알려주세요.
 - 모든 프로젝트가 이렇지는 않습니다 — Grafana는 할당 없이도 외부 PR을 받습니다. 어느 쪽이든 가정하지 말고 그 레포의 실제 관례를 확인하고, 어느 경우인지 사용자에게 알려주세요.
 
+**할당만이 PR 전 게이트가 아닙니다 — 어떤 레포는 이슈 자체가 사전 승인을 받아야 합니다.** mem0의 PR Gate 봇은 링크된 이슈에 `accepted` 라벨이 없으면 PR을 자동으로 닫습니다("We only review pull requests that fix an issue we have already agreed to take on"). 수정 자체는 올바르게 됐는데(Valkey의 미지원 `DD` 플래그 대신 `SCAN`+`DEL`로 교체), 이슈가 라벨을 못 받아서 PR이 #7013과 #7023 두 번 닫혔습니다. 라벨은 메인테이너가 붙이는 것이고, 기여자는 이슈에 요청만 할 수 있을 뿐 직접 붙일 수 없습니다 — 그래서 그때까지 PR은 닫힌 채 남습니다.
+
+**PR을 열기 전에, 그 레포가 할당 말고 이슈 라벨로 게이트를 거는지 확인하세요.** PR을 닫는 봇의 워크플로(예: `.github/workflows/pr-gate.yml`)나 CONTRIBUTING.md에서 "accepted", "approved", "triaged", "prioritized" 같은 전제 조건 문구를 찾으세요. 게이트가 있으면 *PR에 투자하기 전에* 이슈가 그 라벨을 달고 있는지 확인하세요 — 일찍 열면 그냥 자동으로 닫힙니다. 그리고 봇이 출력하는 정확한 재오픈 절차도 기록해두세요: 보통 라벨만 붙으면 재오픈으로 끝납니다.
+
 ## 1. 로컬 CI / 테스트 확인 (타협 불가)
 - `CONTRIBUTING.md`에서 정확한 로컬 테스트 명령을 확인하세요(`make test`, `npm run test`, `pytest`, `cargo test` 등 제각각입니다).
 - PR을 제안하기 전에 `bash_tool`로 **직접 실행**하세요.

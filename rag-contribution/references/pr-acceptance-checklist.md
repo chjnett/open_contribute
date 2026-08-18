@@ -8,6 +8,10 @@ Before running `gh pr create`, the agent **must** enforce this checklist. A PR s
 - Verify assignment by running `gh issue view <issue_number>`. If the user is not in the "Assignees" list, **STOP**. Tell the user they must wait for a maintainer to assign them based on their claim comment.
 - Not every project works this way — Grafana, for instance, accepts external PRs without assignment. Check the repo's actual convention rather than assuming either way, and tell the user which one applies.
 
+**Assignment is not the only pre-PR gate — some repos require the issue itself to be pre-approved.** mem0's PR Gate bot closes any PR whose linked issue lacks the `accepted` label ("We only review pull requests that fix an issue we have already agreed to take on"), automatically, on open. The fix landed correctly (Valkey `SCAN`+`DEL` replacing the unsupported `DD` flag) but the PR was closed twice — #7013 then #7023 — because the issue was never labelled. The label is a maintainer decision; the contributor can ask for it on the issue but cannot apply it, so the PR stays closed until then.
+
+**Before opening a PR, check whether the repo gates on an issue label, not just assignment.** Read the PR-closing bot's workflow (e.g. `.github/workflows/pr-gate.yml`) or CONTRIBUTING.md for phrases like "accepted", "approved", "triaged", "prioritized" as a precondition. If a gate exists, confirm the issue carries the label *before* investing in the PR — opening early just gets it auto-closed. Also note the exact reopen procedure the bot prints: it usually only needs the label applied, then a reopen.
+
 ## 1. Local CI / Tests Verification (Non-Negotiable)
 - Check `CONTRIBUTING.md` for the exact local testing command (e.g., `make test`, `npm run test`, `pytest`, `cargo test`).
 - **Run it locally** via `bash_tool` before suggesting a PR.

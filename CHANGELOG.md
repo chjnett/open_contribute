@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.4] - 2026-08-17
+
+### Added
+- **Check for issue-label PR gates, not just assignment** (PR checklist §0). Some repos
+  auto-close PRs whose linked issue lacks a pre-approval label — mem0's PR Gate bot
+  closes any PR not linked to an `accepted`-labelled issue, and the contributor cannot
+  apply that label themselves. A correct fix (Valkey `SCAN`+`DEL` replacing the
+  unsupported `DD` flag) was closed twice (#7013, #7023) purely because the issue was
+  never labelled. Before investing in a PR, read the repo's PR-closing workflow or
+  CONTRIBUTING for preconditions like `accepted`/`approved`/`triaged`, confirm the
+  issue carries the label, and record the bot's reopen procedure (label → reopen).
+
 ## [1.10.3] - 2026-08-17
 
 ### Added
