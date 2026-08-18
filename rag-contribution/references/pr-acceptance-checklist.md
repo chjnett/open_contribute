@@ -163,6 +163,19 @@ and committing that churn is a separate nuisance to avoid.
 - Does the repo require referencing the issue number in the commit title? (e.g., `Fix memory leak (#123)`)
 - **Action:** Rewrite the user's commit message to perfectly match the existing repository's conventions.
 
+## 3b. Ensure the commit's author email is linked to the GitHub account (attribution)
+A merged PR counts toward the contributor's profile (e.g. the **Pull Shark** achievement, Bronze = 2 merged PRs) only if GitHub attributes the commits to the account — and that attribution is keyed to the commit's **author email** matching an email on the account. A commit whose email isn't registered shows an unlinked `author`, which silently drops the merge from their count even when the PR itself merged.
+
+Verify attribution, not the config, since that's what GitHub uses:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/{sha}" --jq '{author_login: .author.login, email: .commit.author.email, committed: .commit.committer.date}'
+```
+
+- **A non-null `author_login` that equals the account** is GitHub's own confirmation the email is registered. If `author_login` is `null`, the email is not on the account and the contribution won't count — even if `git config user.email` looks fine locally.
+- **`committer.email` and `author.email` should both be the account's registered address.** Mismatched or noreply addresses that aren't on the account break attribution. Prefer committing with the exact, registered address (a plain Gmail/noreply the account owns), and note that private email mode registers `{login}@users.noreply.github.com` as the address to use.
+- **Attribute is a proxy the user can verify themselves** at `https://github.com/{user}?tab=achievements`; a badge can lag merge by up to ~24h (GitHub's achievements batch is asynchronous), so don't conclude from a badge being absent within a day — but do confirm the `<author_login>` attribution on the merged commits right away.
+
 ## 4. Sign-off, signatures, and CLAs are three different things
 Confusing these wastes a round trip. Check which the repo requires — it may be more than one.
 

@@ -111,6 +111,19 @@ force-push 리베이스 *후에도* 다시 확인하세요 — 위 리베이스�
 - 커밋 제목에 이슈 번호를 넣어야 하나요? (예: `Fix memory leak (#123)`)
 - **조치:** 사용자의 커밋 메시지를 그 레포의 기존 관례에 정확히 맞춰 다시 작성하세요.
 
+## 3b. 커밋의 author 이메일이 GitHub 계정에 연결됐는지 확인하세요 (귀속)
+머지된 PR이 프로필(예: **Pull Shark** 업적, Bronze = 머지 2개)에 반영되려면 GitHub가 그 커밋을 계정에 귀속시켜야 하는데, 그 귀속은 커밋의 **author 이메일**이 계정의 등록 이메일과 일치하는지로 판정됩니다. 이메일이 미등록인 커밋은 연결되지 않은 `author`로 보이고, PR은 머지됐어도 기여 횟수에서 조용히 빠집니다.
+
+설정이 아니라 GitHub가 실제 쓰는 **귀속**을 확인하세요:
+
+```bash
+gh api "repos/{owner}/{repo}/commits/{sha}" --jq '{author_login: .author.login, email: .commit.author.email, committed: .commit.committer.date}'
+```
+
+- **`author_login`이 null이 아니고 계정과 같으면** GitHub가 그 이메일이 등록됐다고 공식 확인한 것입니다. `author_login`이 `null`이면 이메일이 계정에 없어 기여로 안 셉니다 — 로컬 `git config user.email`이 맞아 보여도요.
+- **`committer.email`과 `author.email` 모두 계정의 등록 주소여야 합니다.** 계정에 없는 noreply/불일치 주소는 귀속을 깨뜨립니다. 정확한 등록 주소로 커밋하는 걸 선호하고, 개인정보 모드가 `{login}@users.noreply.github.com`을 쓸 주소로 등록한다는 점도 기억하세요.
+- **사용자가 직접 확인할 수 있는 URL**: `https://github.com/{user}?tab=achievements`. 뱃지는 머지 후 최대 24시간까지 늦을 수 있습니다(GitHub의 업적 집계는 비동기 배치) — 하루 안에 뱃지가 없다고 단정하지 말고, 그래도 머지된 커밋의 `<author_login>` 귀속은 바로 확인하세요.
+
 ## 4. Sign-off, 서명, CLA는 서로 다른 세 가지
 이걸 혼동하면 왕복 한 번을 낭비합니다. 그 레포가 무엇을 요구하는지 확인하세요 — 둘 이상일 수도 있습니다.
 
