@@ -127,16 +127,18 @@ Every rule in the checklist was added after it cost a real run something.
 
 ### What it has produced
 
-Sixteen pull requests, each found and root-caused by the skill from a cold start — one already merged, the rest in review:
+Twenty pull requests, each found and root-caused by the skill from a cold start — three already merged, the rest in review:
 
 <div align="center">
   <img src="./assets/contributions-by-repo.png" alt="Open-source contributions by repository" width="720">
-  <img src="./assets/contribution-status.png" alt="Contribution status: 1 merged, 15 open" width="420">
+  <img src="./assets/contribution-status.png" alt="Contribution status: 3 merged, 17 open" width="420">
 </div>
 
 | PR | Bug | State |
 | :--- | :--- | :--- |
 | [celery/billiard#452](https://github.com/celery/billiard/pull/452) | Worker exceptions were wrapped instead of propagating `BaseException` to the caller | ✅ **merged** |
+| [dlt-hub/dlt#4367](https://github.com/dlt-hub/dlt/pull/4367) | Incremental `lag` rewound the cursor when `last_value` was exactly `0` (falsy) | ✅ **merged** |
+| [grafana/grafana#130906](https://github.com/grafana/grafana/pull/130906) | Copied short URLs carried `orgId=org-5` because the resource namespace was used as the org ID; on-prem carries the user's org, Cloud omits it | ✅ **merged** |
 | [run-llama/llama_index#22723](https://github.com/run-llama/llama_index/pull/22723) | Bedrock Cohere models silently dropped `additional_kwargs`, so `output_dimension` never reached the API | In review |
 | [run-llama/llama_index#22724](https://github.com/run-llama/llama_index/pull/22724) | mcp 2.x `streamable_http_client` yields a 2-tuple but `client.py` still unpacked a 3-tuple | In review |
 | [run-llama/llama_index#22725](https://github.com/run-llama/llama_index/pull/22725) | `Dispatcher.__init__` used mutable list defaults (`B006`), sharing handler state between instances | In review |
@@ -147,10 +149,12 @@ Sixteen pull requests, each found and root-caused by the skill from a cold start
 | [BerriAI/litellm#37163](https://github.com/BerriAI/litellm/pull/37163) | Redis cluster shutdown dereferenced a `None` connection pool, aborting billing flush | In review |
 | [BerriAI/litellm#37164](https://github.com/BerriAI/litellm/pull/37164) | `langfuse_otel` never set observation output for `/v1/rerank` | In review |
 | [BerriAI/litellm-docs#912](https://github.com/BerriAI/litellm-docs/pull/912) | Docs referenced nonexistent `litellm.turn_on_message_logging` | In review |
+| [vllm-project/vllm#52610](https://github.com/vllm-project/vllm/pull/52610) | `/v1/messages` crashed when a `tool_result` contained a `tool_reference` item | In review |
+| [vllm-project/vllm#52787](https://github.com/vllm-project/vllm/pull/52787) | `DeepseekCompressor`'s `head_dim==512` path imported CuTe DSL without a `has_cutedsl()` guard | In review |
 | [psycopg/psycopg#1383](https://github.com/psycopg/psycopg/pull/1383) | Binary copy field length exceeding data raised a generic error instead of `DataError` | In review |
 | [sqlfluff/sqlfluff#8350](https://github.com/sqlfluff/sqlfluff/pull/8350) | Unpinned `pip-tools` in the Dockerfile broke `pip-compile` | In review |
 | [onyx-dot-app/onyx#14011](https://github.com/onyx-dot-app/onyx/pull/14011) | Vision-LLM warning fired for batches without images | In review |
-| [grafana/grafana#130614](https://github.com/grafana/grafana/pull/130614) | Copied short URLs carried `orgId=org-5` because the resource namespace was used as the org ID | In review |
+| [dlt-hub/dlt#4373](https://github.com/dlt-hub/dlt/pull/4373) | Docs sidebar `Notifications` category renamed to `Alerts` | In review |
 | [directus/directus#28092](https://github.com/directus/directus/pull/28092) | GraphQL fragments on an M2A union resolved every field to `null` | In review |
 
 The second run is the better illustration of the funnel: 30 backend repos screened for availability → 13 with open contribution issues → 11 through the merge gate → **229 candidate issues checked for linked PRs** → 26 still claimable → one with a defect verified live in `main`.
@@ -166,7 +170,7 @@ The second run is the better illustration of the funnel: 30 backend repos screen
 
 ## Reproducing the charts
 
-The merge-gate and triage charts come only from measurements taken on 2026-08-12, with the method printed on each chart; the contribution charts track PRs opened through this skill via `gh` (as of 2026-08-17):
+The merge-gate and triage charts come only from measurements taken on 2026-08-12, with the method printed on each chart; the contribution charts track PRs opened through this skill via `gh` (as of 2026-08-19):
 
 ```bash
 python3 scripts/generate_charts.py

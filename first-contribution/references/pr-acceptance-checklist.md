@@ -131,6 +131,27 @@ not strictly required by the fix — unrelated refactors, drive-by formatting, "
 here" improvements. Move genuinely separate changes into their own PR. Every line you
 can cut is a line the reviewer doesn't have to verify.
 
+**Smallest change is still bounded by the environments the code runs in — a reviewer can
+legitimately ask you to widen the fix to handle a deployment mode your issue didn't
+mention.** On grafana #130906, the change baked the user's `orgId` into the short-URL
+query param unconditionally. A reviewer (evictorero) pointed out that Cloud doesn't
+support multi-org, so `?orgId=1` was pure noise there — and pointed at an existing
+`isOnPrem()` helper. The fix became: on on-prem carry the org, on Cloud omit the param,
+with a Cloud test added. The reviewer then approved and it merged the same day. Rules
+this teaches:
+
+- **When a reviewer names an existing helper to condition on, use it.** If the repo
+  already distinguishes a mode (`isOnPrem()`, platform checks, feature flags), the
+  reviewer is telling you the *spec* is that distinction, not "always add the param."
+- **Cover the not-default mode in a test**, even if the original report was single-mode.
+  The Cloud case is the one the reviewer specifically worried about; asserting it shows
+  you understood why they asked.
+- **A code-owners reviewer's approval is often the one that unlocks merge.** matyax
+  reviewed but stepped back; nmarrs approved but flagged he needed a *different*
+  approver (he'd pushed an update); the deciding review came from the CODEOWNERS path
+  (evictorero). Don't assume one approve is enough — read who the policy actually
+  requires, and be ready for a second reviewer on the owning team.
+
 ## 1i. Account for distributed/cluster modes and memory limits during database operations (e.g., Redis/Valkey)
 
 A fix that works perfectly in a local single-node environment or testing suite can cause severe failures, crashes, or out-of-memory errors in large-scale production environments or distributed modes (such as Redis/Valkey Cluster).
