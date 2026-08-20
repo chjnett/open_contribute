@@ -12,6 +12,15 @@ Before running `gh pr create`, the agent **must** enforce this checklist. A PR s
 
 **Before opening a PR, check whether the repo gates on an issue label, not just assignment.** Read the PR-closing bot's workflow (e.g. `.github/workflows/pr-gate.yml`) or CONTRIBUTING.md for phrases like "accepted", "approved", "triaged", "prioritized" as a precondition. If a gate exists, confirm the issue carries the label *before* investing in the PR — opening early just gets it auto-closed. Also note the exact reopen procedure the bot prints: it usually only needs the label applied, then a reopen.
 
+## 0b. Disclose AI assistance explicitly — before the PR, in the PR body
+Maintainers can (and will) tell whether a PR was drafted by an AI agent, and a repo that gets a lot of them will escalate: sqlfluff #8350's maintainer rejected a version-pin PR outright with "This is very clearly fully AI, and was not disclosed. Spam, please close." The rejection was framed around the missing disclosure, not the code — a clear signal that undisclosed AI origin can turn a good-faith PR into collateral in an anti-AI-spam policy.
+
+Rules this teaches:
+- **Say it in the PR body, explicitly and up front.** A single line is enough: "This change was drafted with AI assistance; I verified it against the project's test suite / docs." Do not rely on the diff being small or the fix being obvious — disclose regardless.
+- **The PR body's summary should own the work.** State what you changed, how you verified it (which tests ran, or openly why they couldn't), what you couldn't test, and any deviation from the issue. A maintainer deciding fast needs this to evaluate the diff; it also reads as competence, not as trying to hide anything.
+- **If the maintainer already described the resolution in the issue, read it before opening.** sqlfluff's own maintainer had noted pip-tools 7.6.1 fixed the root cause; the pin PR that re-implemented it by a different route was "unnecessary and noisy". A PR that duplicates the maintainer's own stated resolution, undisclosed as AI, gets the worst of both.
+- **Handle rejection with grace.** If a maintainer says it's unnecessary or the disclosure was missing, acknowledge both specifically, correct course, and move on — don't argue that the code was good. The relationship you keep is worth more than the merged PR.
+
 ## 1. Local CI / Tests Verification (Non-Negotiable)
 - Check `CONTRIBUTING.md` for the exact local testing command (e.g., `make test`, `npm run test`, `pytest`, `cargo test`).
 - **Run it locally** via `bash_tool` before suggesting a PR.
