@@ -160,6 +160,8 @@ this teaches:
   approver (he'd pushed an update); the deciding review came from the CODEOWNERS path
   (evictorero). Don't assume one approve is enough — read who the policy actually
   requires, and be ready for a second reviewer on the owning team.
+- **A reviewer's suggested alternative is a hypothesis too — verify it locally before applying it.** On polars #28911, the reviewer flagged that the `struct` wrapper in my `n_unique` fix could cost a row-encoding pass. I switched to the suggested `unique(subset=...)` delegation, and it **panicked** in the backend (`cannot get ref Int64 from Int32`) on the exact expression-subset case the method documents — something the reviewer's performance concern didn't anticipate. The `struct` wrapper turned out to be the *only* correct path. Acting on a performance/design hint without first running it is how you trade a correct-but-slower fix for a broken one. When a reviewer proposes an alternative, test it against the documented/issue cases that your fix already handled; if it breaks one of them, keep your version and show the reviewer the concrete failure rather than silently deferring.
+- **A platform-scoped CI failure on an otherwise-passing PR is worth asking about, not assuming.** polars's `test-python (ubuntu, 3.10–3.14)` all passed while `windows-latest, 3.14` failed — a pure-Python change shouldn't differ by OS, so I asked the maintainer whether that failure was known/pre-existing before treating it as my responsibility. When the failing job is narrow and your diff is platform-independent, check whether it's a pre-existing infra issue instead of churning the code.
 
 ## 1i. Account for distributed/cluster modes and memory limits during database operations (e.g., Redis/Valkey)
 
