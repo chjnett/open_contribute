@@ -21,6 +21,15 @@ Rules this teaches:
 - **If the maintainer already described the resolution in the issue, read it before opening.** sqlfluff's own maintainer had noted pip-tools 7.6.1 fixed the root cause; the pin PR that re-implemented it by a different route was "unnecessary and noisy". A PR that duplicates the maintainer's own stated resolution, undisclosed as AI, gets the worst of both.
 - **Handle rejection with grace.** If a maintainer says it's unnecessary or the disclosure was missing, acknowledge both specifically, correct course, and move on — don't argue that the code was good. The relationship you keep is worth more than the merged PR.
 
+## 0c. Read the CONTRIBUTING up front for first-time-contributor requirements — AI disclosure may not be enough
+Some repos that are flooded with AI PRs don't just want a disclosure; they want **proof of local verification** and will close a PR that doesn't have it, however correct the code. polars #28911 (a correct `DataFrame.n_unique` fix) was closed by a maintainer with only a link to their CONTRIBUTING's first-time section, which says: *"You must post a screenshot of you successfully running the test suite (`make test`), locally on your machine (not the CI). The screenshot must show your terminal window borders..."* — and "You may not have more than one open PR at a time." We disclosed AI help and verified logic in a venv, but had not run the full local suite to produce that screenshot, so the PR was closed on policy before review.
+
+Before spending effort on a PR, **read the repo's CONTRIBUTING first-time section** and confirm you can actually meet every condition — not just disclose:
+
+- **Does it require a local test screenshot or other proof-of-execution beyond CI?** If so, verify you can run the exact command (`make test`, `pytest`, etc.) on your machine and capture a proper screenshot with visible terminal borders before opening the PR. If you can't (huge install, no hardware), the PR is likely to be policy-closed regardless of quality — either find a repo that doesn't require it, or clear the requirement with a maintainer first.
+- **Does it limit concurrent open PRs, require an existing issue you own, or gate on a merge count / label?** Confirm each precondition is satisfiable now, not just in principle.
+- **The summary in §0b should go further than "I couldn't run it".** For a repo with a proof requirement, if you truly cannot run the local suite, say so and ask the maintainer up front whether the PR is welcome before submitting — don't let it get policy-closed after you've done the work.
+
 ## 1. Local CI / Tests Verification (Non-Negotiable)
 - Check `CONTRIBUTING.md` for the exact local testing command (e.g., `make test`, `npm run test`, `pytest`, `cargo test`).
 - **Run it locally** via `bash_tool` before suggesting a PR.
