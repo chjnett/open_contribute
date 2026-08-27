@@ -50,6 +50,11 @@ PRs plus an "Upstream" label meant the fix belongs in the `isoduration` dependen
 jsonschema. Either is a hard "move on" signal: the work is already happening elsewhere.
 Check closed PRs and labels before assuming an unassigned, unlinked issue is free.
 
+A single bug can also have **several independent open PRs racing** with no link in the Development section. On outlines (#1998/#1996/#1997/#1980) four of our PRs overlapped earlier/later competitor PRs (#2007, #2008, #2020-22), none merged yet. Before implementing, also search other PRs touching the same code path or bug (issue timeline, `gh search prs`, or titles referencing the same issue) — not just the issue you're fixing. When overlap exists, don't let several unmerged duplicates pile up: keep the PR that is *earliest* and *smallest*, close the rest *yourself* with a short comment naming the survivor and why, and post a positioning note (first-opened, minimal diff, single linked issue) on the survivor so a maintainer can pick. And find the de-facto maintainer via the committer of recent merges (outlines merges are all committed by `Robin Picard`) to target pings.
+
+## Step 2b — Some repos gate implementation behind an explicit acceptance label or pre-approval
+"Open" plus a `bug` label is *not* necessarily an open invitation. Some CONTRIBUTING.md requires first-time contributors to only take issues labelled `help wanted`/`good first issue`, and demands explicit maintainer pre-approval for everything else — PRs opened without it can be closed without review (dlt: a precisely-documented `bug` #4315 with a suggested fix still needed approval before implementing; same fate as the polars screenshot gate). Check the repo's CONTRIBUTING submission gate *before writing code*: when approval is required, comment the intended approach on the issue and wait, rather than implementing speculatively or opening the PR blind.
+
 ## Step 4 — Check Assignees
 "No one assigned" is necessary but not sufficient (see Steps 3 and 5) — plenty of people work on issues without formally requesting assignment. But if someone *is* assigned, skip it.
 

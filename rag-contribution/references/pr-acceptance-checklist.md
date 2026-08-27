@@ -12,6 +12,10 @@ Before running `gh pr create`, the agent **must** enforce this checklist. A PR s
 
 **Before opening a PR, check whether the repo gates on an issue label, not just assignment.** Read the PR-closing bot's workflow (e.g. `.github/workflows/pr-gate.yml`) or CONTRIBUTING.md for phrases like "accepted", "approved", "triaged", "prioritized" as a precondition. If a gate exists, confirm the issue carries the label *before* investing in the PR — opening early just gets it auto-closed. Also note the exact reopen procedure the bot prints: it usually only needs the label applied, then a reopen.
 
+**Some repos gate on a maintainer pre-approval, not a bot label.** dlt's CONTRIBUTING restricts first-time contributors to `help wanted`/`good first issue` issues and requires an explicit maintainer pre-approval for everything else — even a clearly-documented `bug` with a suggested fix (dlt #4315) needs a plan comment approved *before* you implement; opening the PR blind gets it closed without review, same as the polars screenshot gate. When the CONTRIBUTING asks for approval, comment your intended approach on the issue and wait rather than implementing speculatively.
+
+**Check for competing PRs on the same issue before opening.** A bug can race several independent unmerged PRs with no link in the issue's Development section (outlines #1998/#1996/#1997/#1980 each drew 2-3 overlapping PRs incl. ours). Search the issue timeline / `gh search prs` / other titles referencing the same bug. If overlap already exists, keep the earliest + smallest, close the duplicates yourself with a short comment naming the survivor, and post a positioning note (first-opened, minimal diff, single linked issue) on the survivor.
+
 ## 0b. Disclose AI assistance explicitly — before the PR, in the PR body
 Maintainers can (and will) tell whether a PR was drafted by an AI agent, and a repo that gets a lot of them will escalate: sqlfluff #8350's maintainer rejected a version-pin PR outright with "This is very clearly fully AI, and was not disclosed. Spam, please close." The rejection was framed around the missing disclosure, not the code — a clear signal that undisclosed AI origin can turn a good-faith PR into collateral in an anti-AI-spam policy.
 
@@ -27,13 +31,14 @@ Some repos that are flooded with AI PRs don't just want a disclosure; they want 
 Before spending effort on a PR, **read the repo's CONTRIBUTING first-time section** and confirm you can actually meet every condition — not just disclose:
 
 - **Does it require a local test screenshot or other proof-of-execution beyond CI?** If so, verify you can run the exact command (`make test`, `pytest`, etc.) on your machine and capture a proper screenshot with visible terminal borders before opening the PR. If you can't (huge install, no hardware), the PR is likely to be policy-closed regardless of quality — either find a repo that doesn't require it, or clear the requirement with a maintainer first.
-- **Does it limit concurrent open PRs, require an existing issue you own, or gate on a merge count / label?** Confirm each precondition is satisfiable now, not just in principle.
+- **Does it limit concurrent open PRs, require an existing issue you own, or gate on a merge count / label / maintainer pre-approval?** Confirm each precondition is satisfiable now, not just in principle. In particular, some repos (e.g. dlt) make first-time contributors work *only* `help wanted`/`good first issue` issues and require explicit maintainer pre-approval for everything else — even a precisely-documented `bug` with a suggested fix (dlt #4315) needs a plan comment approved before you implement; opening the PR blind gets it closed without review. When the CONTRIBUTING asks for approval, comment your intended approach on the issue and wait, rather than implementing speculatively.
 - **The summary in §0b should go further than "I couldn't run it".** For a repo with a proof requirement, if you truly cannot run the local suite, say so and ask the maintainer up front whether the PR is welcome before submitting — don't let it get policy-closed after you've done the work.
 
 ## 1. Local CI / Tests Verification (Non-Negotiable)
 - Check `CONTRIBUTING.md` for the exact local testing command (e.g., `make test`, `npm run test`, `pytest`, `cargo test`).
 - **Run it locally** via `bash_tool` before suggesting a PR.
 - If it's a bug fix, ensure the fix is covered by a test. (Did we write a test? Does it fail without the fix and pass with the fix?)
+- **A formatting lint gate can fail separately from tests.** litellm #38477 passed every functional check but its `lint` job failed on `ruff format --check` (my `extra=(...)` literal wasn't ruff-shaped). Before pushing, run the repo's pinned formatter *locally* on the changed files (`uvx --from ruff==0.15.3 ruff format path/to/file.py`, or the project's own `ruff format` command) rather than round-tripping formatting fixes with CI. Use the exact pinned version, not your global one.
 
 **When you genuinely cannot run them**, say so instead of implying you did. Very large repos have real setup costs — a Grafana `yarn install` needs several GB, which is not always available. Check `df -h` before starting rather than discovering it halfway through, and never fill the user's disk to satisfy a checklist item.
 
