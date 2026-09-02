@@ -112,21 +112,20 @@ print("wrote assets/merge_gate.png and assets/triage_attrition.png")
 
 
 # ---------------------------------------------------------------- chart 3
-# Contributions by repository, all-time via `gh` as of 2026-08-19.
+# Contributions by repository, live PRs (open + merged), via `gh` as of 2026-08-28.
 fig, ax = plt.subplots(figsize=(8, 4.6), dpi=170)
 repos = [
-    ("outlines", 4, "#6c5ce7"),
     ("llama_index", 3, "#f0932b"),
     ("litellm", 3, "#00b894"),
+    ("outlines", 2, "#6c5ce7"),
     ("vllm", 2, "#0984e3"),
     ("dlt", 2, "#e17055"),
-    ("psycopg", 1, "#0984e3"),
-    ("sqlfluff", 1, "#d63031"),
-    ("onyx", 1, "#e17055"),
-    ("grafana", 1, "#fdcb6e"),
-    ("directus", 1, "#a29bfe"),
-    ("litellm-docs", 1, "#636e72"),
     ("billiard", 1, "#2d3436"),
+    ("grafana", 1, "#fdcb6e"),
+    ("psycopg", 1, "#0984e3"),
+    ("Llama-Factory", 1, "#d63031"),
+    ("onyx", 1, "#e17055"),
+    ("litellm-docs", 1, "#636e72"),
 ]
 repos = sorted(repos, key=lambda r: -r[1])
 names = [r[0] for r in repos]
@@ -139,7 +138,7 @@ for bar, c in zip(ax.patches, counts):
             str(c), va="center", ha="left", fontsize=13, fontweight="bold", color=INK)
 # mark merged repos
 for i, n in enumerate(names):
-    if n in ("billiard", "grafana", "dlt"):
+    if n in ("billiard", "dlt", "grafana", "psycopg"):
         ax.text(counts[i] + 0.08, i, "\u2713 merged", va="center", ha="left",
                 fontsize=11, color=GREEN, fontweight="bold")
 ax.set_yticks(y)
@@ -158,13 +157,13 @@ plt.close(fig)
 # ---------------------------------------------------------------- chart 4
 # Contribution status: merged vs open.
 fig, ax = plt.subplots(figsize=(5.4, 4.4), dpi=170)
-merged, open_prs = 3, 17
+merged, open_prs = 4, 14
 sizes = [merged, open_prs]
 labels = ["Merged", "Open"]
 donut_colors = [GREEN, "#74b9ff"]
 wedges, _ = ax.pie(sizes, colors=donut_colors, startangle=90, counterclock=False,
                    explode=(0.04, 0), wedgeprops=dict(width=0.42, edgecolor="white", linewidth=2))
-ax.text(0, 0.06, "20", ha="center", va="center", fontsize=34, fontweight="bold", color=INK)
+ax.text(0, 0.06, "18", ha="center", va="center", fontsize=34, fontweight="bold", color=INK)
 ax.text(0, -0.24, "PRs total", ha="center", va="center", fontsize=12, color=MUTED)
 ax.legend(wedges, [f"{l}  ({s})" for l, s in zip(labels, sizes)],
           loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=11)
